@@ -1,67 +1,67 @@
-# WayToLearn
+## WaytoLearn
 
-## Visión General
-waytolearn es una aplicación móvil basada en Flutter diseñada para el aprendizaje interactivo. Este proyecto utiliza las capacidades multiplataforma de Flutter, integra Firebase para servicios backend y incluye diversos activos para enriquecer la experiencia de aprendizaje.
+Aplicación Flutter para aprendizaje infantil (matemáticas y comunicación) con autenticación de Google y Firebase.
 
-## Estructura del Proyecto
-```
-waytolearn/
-├── .env
-├── pubspec.yaml
-├── lib/
-│   ├── main.dart
-│   ├── firebase_options.dart
-│   └── pages/
-│       └── pagina02.dart
-├── android/
-│   ├── build.gradle
-│   ├── app/
-│   │   ├── build.gradle
-│   │   ├── google-services.json
-│   │   └── src/main/AndroidManifest.xml
-│   └── ...
-├── assets/
-│   ├── images/
-│   │   ├── baymaxface.png
-│   └── icons/
-└── build/
+### Requisitos
+- Flutter 3.x y Dart 3.x
+- Android Studio o VS Code
+- Proyecto en Firebase
+
+### Instalación rápida
+```bash
+git clone <repo>
+cd waytolearn
+flutter pub get
 ```
 
-## Instrucciones de Configuración
-1. Asegúrate de tener instalado Flutter (SDK >= 3.3.4 < 4.0.0) y Android Studio.
-2. Clona el repositorio: `git clone <repository-url>`.
-3. Navega al directorio del proyecto: `cd <project-directory>`.
-4. Instala las dependencias: `flutter pub get`.
-5. Configura `local.properties` con la ruta de tu SDK de Android si es necesario.
-6. Configura Firebase agregando `google-services.json` al directorio `android/app`.
-7. Crea un archivo `.env` en el directorio raíz con variables de entorno (e.g., claves API).
-8. Ejecuta la aplicación: `flutter run`.
+### Variables de entorno (.env)
+Crea un archivo `.env` en la raíz con:
+```bash
+FIREBASE_API_KEY=
+FIREBASE_APP_ID=
+FIREBASE_MESSAGING_SENDER_ID=
+FIREBASE_PROJECT_ID=
+FIREBASE_DATABASE_URL=
+FIREBASE_STORAGE_BUCKET=
+# OAuth 2.0 Client ID (tipo Web)
+FIREBASE_WEB_CLIENT_ID=
+```
+El código usa estas variables en `lib/firebase_options.dart` y para `GoogleSignIn`.
 
-## Dependencias
-- **Flutter**: Marco principal (SDK: flutter).
-- **cupertino_icons**: ^1.0.6 para íconos de estilo iOS.
-- **Firebase**:
-  - `firebase_core`: ^2.24.2 para inicialización de Firebase.
-  - `firebase_auth`: ^4.15.3 para autenticación.
-  - `cloud_firestore`: ^4.13.6 para la base de datos Firestore.
-  - `firebase_storage`: ^11.5.6 para almacenamiento en la nube.
-- **flutter_dotenv**: ^5.1.0 para gestionar variables de entorno.
-- **Dependencias de Desarrollo**:
-  - `flutter_test`: SDK para pruebas.
-  - `flutter_lints`: ^3.0.0 para reglas de linting.
+### Configuración Firebase (Android)
+- Paquete actual de la app: `com.example.waytolearn` (ver `android/app/build.gradle`).
+- Pasos:
+  1) En Firebase Console agrega la app Android con ese paquete.
+  2) Añade huellas digitales (debug/release) del keystore:
+     - Windows (PowerShell):
+       ```bash
+       keytool -list -v -alias androiddebugkey -keystore "$env:USERPROFILE\.android\debug.keystore" -storepass android -keypass android
+       ```
+     - Copia SHA‑1 (y SHA‑256) y pégalas en Firebase > Configuración del proyecto > Tu app Android.
+  3) Habilita el proveedor Google en Authentication.
+  4) En Google Cloud Console crea (o usa) un "OAuth client ID" de tipo Web y colócalo en `FIREBASE_WEB_CLIENT_ID`.
+  5) Descarga y coloca `android/app/google-services.json`.
 
-## Activos
-- Imágenes: Almacenadas en `assets/images/`.
-- Íconos: Almacenados en `assets/icons/`.
-- Archivo de entorno: `.env` para configuración.
+### Ejecutar
+```bash
+flutter clean
+flutter pub get
+flutter run -d android
+```
 
-## Características
-- Módulos de aprendizaje interactivo.
-- Autenticación y almacenamiento de datos impulsados por Firebase.
-- Activos personalizados para una interfaz de usuario rica.
+### Solución rápida a errores comunes
+- ApiException:10 o `sign_in_failed`:
+  - Paquete en Firebase debe ser `com.example.waytolearn`.
+  - Agrega SHA‑1/SHA‑256 y vuelve a descargar `google-services.json`.
+  - Asegura `FIREBASE_WEB_CLIENT_ID` (cliente OAuth Web) y Google habilitado en Authentication.
+  - Reinstala tras `flutter clean && flutter pub get`.
+- PackageId distinto (p.ej. `com.waylearn.waytolearn`):
+  - Actualiza `applicationId`, paquete Kotlin y vuelve a generar `google-services.json` para ese paquete.
+- Permisos/red:
+  - `INTERNET` ya está definido en `android/app/src/main/AndroidManifest.xml`.
 
-## Contribuyendo
-Haz un fork del repositorio y envía pull requests. Sigue el estilo de código existente y actualiza `.gitignore` si se necesitan ignorar nuevos tipos de archivos.
-
-## Versión
-1.0.0+1
+### Estructura mínima
+- `lib/main.dart`: arranque
+- `lib/core/services/user_service.dart`: login con Google/Firebase
+- `lib/presentation/screens/auth/login_screen.dart`: UI de login (botón nativo)
+- `lib/firebase_options.dart`: configuración Firebase (lee `.env`)

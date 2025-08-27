@@ -43,16 +43,22 @@ app.*.map.json
 /android/app/release
 
 # Android/Gradle related
-gradle/
-gradlew
-gradlew.bat
+.gradle/
+android/.gradle/
 local.properties
+android/key.properties
 
-# Android Firebas especific
-google-services.json
+# Android Firebase specific
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
 
 # Environment variables
 .env
 .env.local
 .env.production
 .env.development
+*.env.local
+
+# Flutter metadata and coverage
+.metadata
+coverage/
