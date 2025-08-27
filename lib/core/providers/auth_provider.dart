@@ -143,10 +143,8 @@ class AuthProvider extends ChangeNotifier {
   Future<void> signOut() async {
     try {
       _setLoading(true);
-      await Future.wait([
-        _auth.signOut(),
-        _googleSignIn.signOut(),
-      ]);
+      // Solo cerrar sesión con Firebase para simplificar y reducir puntos de fallo
+      await _auth.signOut();
       _userModel = null;
       _setLoading(false);
     } catch (e) {

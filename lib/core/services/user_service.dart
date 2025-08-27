@@ -160,12 +160,18 @@ class UserService extends ChangeNotifier {
 
   Future<void> signOut() async {
     try {
-      await _googleSignIn.signOut();
+      _setLoading(true);
+      _clearError();
+
+      // Cerrar sesión únicamente con Firebase para simplificar y evitar fallos
       await _auth.signOut();
+
       _currentUser = null;
       notifyListeners();
     } catch (e) {
       _setError('Error al cerrar sesión: $e');
+    } finally {
+      _setLoading(false);
     }
   }
 

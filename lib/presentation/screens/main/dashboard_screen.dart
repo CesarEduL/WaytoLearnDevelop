@@ -4,6 +4,7 @@ import '../../../core/services/user_service.dart';
 import '../../../core/models/user_model.dart';
 import '../../../core/theme/app_theme.dart';
 import '../profile/profile_screen.dart';
+import '../splash_screen.dart';
 import '../exercises/exercise_selection_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -770,7 +771,12 @@ class _DashboardScreenState extends State<DashboardScreen>
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              Provider.of<UserService>(context, listen: false).signOut();
+              Provider.of<UserService>(context, listen: false).signOut().then((_) {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const SplashScreen()),
+                  (route) => false,
+                );
+              });
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.primaryColor,

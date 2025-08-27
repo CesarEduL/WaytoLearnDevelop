@@ -4,6 +4,7 @@ import '../../../core/providers/user_provider.dart';
 import '../../../core/providers/game_provider.dart';
 import '../../../core/theme/app_theme.dart';
 import 'exercise_screen.dart';
+import '../communication/stories_launcher.dart';
 
 class ExerciseSelectionScreen extends StatefulWidget {
   final String subject;
@@ -30,6 +31,8 @@ class _ExerciseSelectionScreenState extends State<ExerciseSelectionScreen>
     _initializeAnimations();
     _startAnimations();
   }
+
+  
 
   void _initializeAnimations() {
     _fadeController = AnimationController(
@@ -462,6 +465,11 @@ class _ExerciseSelectionScreenState extends State<ExerciseSelectionScreen>
         ),
         
         const SizedBox(height: 16),
+        if (widget.subject == 'communication')
+          Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            child: _buildStoriesEntry(context),
+          ),
         
         Consumer<UserProvider>(
           builder: (context, userProvider, child) {
@@ -685,6 +693,47 @@ class _ExerciseSelectionScreenState extends State<ExerciseSelectionScreen>
           subject: widget.subject,
           isRandom: true,
         ),
+      ),
+    );
+  }
+
+  Widget _buildStoriesEntry(BuildContext context) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: ListTile(
+        leading: Container(
+          width: 50,
+          height: 50,
+          decoration: BoxDecoration(
+            color: _getSubjectColor().withOpacity(0.1),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(
+            Icons.menu_book,
+            color: _getSubjectColor(),
+            size: 24,
+          ),
+        ),
+        title: const Text(
+          'Cuentos Interactivos',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+        subtitle: Text(
+          'Lee y elige el camino de la historia',
+          style: TextStyle(color: AppTheme.textSecondary),
+        ),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const StoriesLauncher(),
+            ),
+          );
+        },
       ),
     );
   }
