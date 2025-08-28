@@ -4,6 +4,7 @@ import '../../../core/services/user_service.dart';
 import '../../../core/models/user_model.dart';
 import '../../../core/theme/app_theme.dart';
 import '../profile/profile_screen.dart';
+import '../profile/progress_reports_screen.dart';
 import '../splash_screen.dart';
 import '../exercises/exercise_selection_screen.dart';
 
@@ -92,6 +93,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
+      drawer: _buildDrawer(context),
       body: SafeArea(
         child: Consumer<UserService>(
           builder: (context, userService, child) {
@@ -135,7 +137,29 @@ class _DashboardScreenState extends State<DashboardScreen>
 
                       const SizedBox(height: 20),
 
-                      // Materias disponibles
+                      // Recomendaciones diarias
+                      SlideTransition(
+                        position: _slideAnimation,
+                        child: FadeTransition(
+                          opacity: _fadeAnimation,
+                          child: _buildDailyRecommendations(),
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      // Mundos para explorar
+                      SlideTransition(
+                        position: _slideAnimation,
+                        child: FadeTransition(
+                          opacity: _fadeAnimation,
+                          child: _buildWorldsSection(),
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      // Temas (grid de materias)
                       SlideTransition(
                         position: _slideAnimation,
                         child: FadeTransition(
@@ -441,30 +465,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppTheme.primaryColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                Icons.school,
-                color: AppTheme.primaryColor,
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              '¿Qué quieres aprender hoy?',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: AppTheme.textPrimary,
-              ),
-            ),
-          ],
-        ),
+        _buildSectionHeader(icon: Icons.school, color: AppTheme.primaryColor, title: 'Temas'),
         const SizedBox(height: 16),
         
         Row(
@@ -489,6 +490,85 @@ class _DashboardScreenState extends State<DashboardScreen>
               ),
             ),
           ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSectionHeader({required IconData icon, required Color color, required String title}) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, color: color, size: 24),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          title,
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: AppTheme.textPrimary,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDailyRecommendations() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(icon: Icons.recommend, color: AppTheme.secondaryColor, title: 'Tus recomendaciones diarias'),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 150,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: 5,
+            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            itemBuilder: (context, index) {
+              final locked = index != 0;
+              return _RecommendationTile(locked: locked, label: locked ? 'Locked' : 'Division');
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildWorldsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(icon: Icons.public, color: AppTheme.accentColor, title: 'Mundos para explorar'),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 86,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: 6,
+            separatorBuilder: (_, __) => const SizedBox(width: 14),
+            itemBuilder: (context, i) {
+              final colors = [
+                const Color(0xFF60A5FA),
+                const Color(0xFFF59E0B),
+                const Color(0xFF34D399),
+                const Color(0xFFF472B6),
+                const Color(0xFFA78BFA),
+                const Color(0xFF22D3EE),
+              ];
+              final c = colors[i % colors.length];
+              return CircleAvatar(
+                radius: 36,
+                backgroundColor: Colors.white,
+                child: CircleAvatar(radius: 34, backgroundColor: c, child: const Icon(Icons.tag_faces, color: Colors.white)),
+              );
+            },
+          ),
         ),
       ],
     );
@@ -783,6 +863,88 @@ class _DashboardScreenState extends State<DashboardScreen>
               foregroundColor: Colors.white,
             ),
             child: const Text('Cerrar Sesión'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Drawer _buildDrawer(BuildContext context) {
+    return Drawer(
+      child: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const ListTile(
+              leading: CircleAvatar(child: Icon(Icons.person)),
+              title: Text('Tu hijo/a'),
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.insert_chart_outlined),
+              title: const Text('Informes de progreso'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const ProgressReportsScreen(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text('Área de padres'),
+              onTap: () {},
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RecommendationTile extends StatelessWidget {
+  final bool locked;
+  final String label;
+  const _RecommendationTile({required this.locked, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 220,
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18)),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFFFFCF53), Color(0xFFFF9D4D)],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          if (locked)
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(color: Colors.black.withOpacity(0.35), borderRadius: BorderRadius.circular(18)),
+                child: const Center(child: Icon(Icons.lock, color: Colors.white, size: 40)),
+              ),
+            ),
+          Positioned(
+            left: 12,
+            bottom: 10,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
+              child: Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
+            ),
           ),
         ],
       ),

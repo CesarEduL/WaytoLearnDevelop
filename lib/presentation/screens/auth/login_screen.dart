@@ -438,8 +438,8 @@ class _LoginScreenState extends State<LoginScreen>
       final success = await userService.signInWithGoogle();
       
       if (success && mounted) {
-        // La navegación se maneja automáticamente en el UserService
-        // No necesitamos hacer nada aquí
+        // Ir al dashboard tras iniciar sesión correctamente
+        Navigator.of(context).popUntil((route) => route.isFirst);
       } else if (mounted) {
         // Mostrar error si no fue exitoso
         _showErrorSnackBar(scaffoldMessenger, userService.errorMessage ?? 'Error al iniciar sesión');

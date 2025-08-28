@@ -68,8 +68,8 @@ class _SplashScreenState extends State<SplashScreen>
 
     // Animación de color del fondo
     _colorAnimation = ColorTween(
-      begin: AppTheme.backgroundColor,
-      end: AppTheme.primaryColor,
+      begin: AppTheme.primaryColor,
+      end: const Color(0xFF5B8CFF),
     ).animate(CurvedAnimation(
       parent: _backgroundController,
       curve: Curves.easeInOut,
@@ -138,8 +138,8 @@ class _SplashScreenState extends State<SplashScreen>
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  _colorAnimation.value ?? AppTheme.backgroundColor,
-                  AppTheme.backgroundColor,
+                  _colorAnimation.value ?? AppTheme.primaryColor,
+                  AppTheme.primaryColor,
                 ],
               ),
             ),
@@ -153,8 +153,8 @@ class _SplashScreenState extends State<SplashScreen>
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Logo animado del osito
-                      _buildAnimatedLogo(),
+                      // Logo animado (placeholder Panda)
+                      _buildAnimatedPanda(),
                       
                       const SizedBox(height: 50),
                       
@@ -191,103 +191,15 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 
-  Widget _buildAnimatedLogo() {
+  Widget _buildAnimatedPanda() {
     return AnimatedBuilder(
       animation: _logoController,
       builder: (context, child) {
         return Transform.scale(
           scale: _logoAnimation.value,
           child: Transform.rotate(
-            angle: _logoAnimation.value * 0.05,
-            child: Container(
-              width: 180,
-              height: 180,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(30),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.15),
-                    blurRadius: 25,
-                    offset: const Offset(0, 15),
-                    spreadRadius: 2,
-                  ),
-                ],
-              ),
-              child: Stack(
-                children: [
-                  // Fondo del logo con patrón sutil
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(30),
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Colors.white,
-                          Colors.grey.shade50,
-                        ],
-                      ),
-                    ),
-                  ),
-                  
-                  // Contenido del logo
-                  Padding(
-                    padding: const EdgeInsets.all(25),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Osito de peluche (representado con iconos)
-                        Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            color: Colors.brown.shade300,
-                            borderRadius: BorderRadius.circular(40),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.brown.withOpacity(0.3),
-                                blurRadius: 10,
-                                offset: const Offset(0, 5),
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.face,
-                            size: 50,
-                            color: Colors.brown,
-                          ),
-                        ),
-                        
-                        const SizedBox(height: 12),
-                        
-                        // Libro
-                        Container(
-                          width: 60,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: AppTheme.primaryColor,
-                            borderRadius: BorderRadius.circular(8),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppTheme.primaryColor.withOpacity(0.4),
-                                blurRadius: 8,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.book,
-                            color: Colors.white,
-                            size: 24,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            angle: _logoAnimation.value * 0.03,
+            child: _PandaPlaceholder(size: 200),
           ),
         );
       },
@@ -309,8 +221,8 @@ class _SplashScreenState extends State<SplashScreen>
                   'WaytoLearn',
                   style: Theme.of(context).textTheme.displayMedium?.copyWith(
                     color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 42,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 44,
                     shadows: const [
                       Shadow(
                         color: Colors.black54,
@@ -327,15 +239,15 @@ class _SplashScreenState extends State<SplashScreen>
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withOpacity(0.18),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: Colors.white.withOpacity(0.3),
+                      color: Colors.white.withOpacity(0.28),
                       width: 1,
                     ),
                   ),
                   child: Text(
-                    'Aprende jugando con tu amigo oso',
+                    'La aplicación interactiva n.º 1 para niños',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.w500,
@@ -372,9 +284,9 @@ class _SplashScreenState extends State<SplashScreen>
                 child: CircularProgressIndicator(
                   strokeWidth: 4,
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    Colors.white.withOpacity(0.9),
+                    Colors.white.withOpacity(0.95),
                   ),
-                  backgroundColor: Colors.white.withOpacity(0.2),
+                  backgroundColor: Colors.white.withOpacity(0.24),
                 ),
               ),
               
@@ -431,4 +343,124 @@ class ParticlePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+// Placeholder de Panda (vector simple con shapes)
+class _PandaPlaceholder extends StatelessWidget {
+  final double size;
+  const _PandaPlaceholder({required this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    final double head = size * 0.58;
+    final double ear = head * 0.28;
+    final double eye = head * 0.22;
+    final double pupil = eye * 0.45;
+
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Sombra
+          Positioned(
+            bottom: size * 0.05,
+            child: Container(
+              width: head * 0.9,
+              height: 12,
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.25),
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+          // Cuerpo
+          Positioned(
+            bottom: size * 0.18,
+            child: Container(
+              width: head * 0.95,
+              height: head * 0.58,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFF6B6B),
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+          ),
+          // Cabeza
+          Container(
+            width: head,
+            height: head,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 24,
+                  offset: const Offset(0, 12),
+                ),
+              ],
+            ),
+          ),
+          // Orejas
+          Positioned(
+            top: size * 0.16,
+            left: size * 0.28,
+            child: _circle(ear, Colors.black),
+          ),
+          Positioned(
+            top: size * 0.16,
+            right: size * 0.28,
+            child: _circle(ear, Colors.black),
+          ),
+          // Ojos
+          Positioned(
+            top: size * 0.28,
+            left: size * 0.34,
+            child: _circle(eye, Colors.black),
+          ),
+          Positioned(
+            top: size * 0.28,
+            right: size * 0.34,
+            child: _circle(eye, Colors.black),
+          ),
+          // Pupilas
+          Positioned(
+            top: size * 0.34,
+            left: size * 0.38,
+            child: _circle(pupil, Colors.white),
+          ),
+          Positioned(
+            top: size * 0.34,
+            right: size * 0.38,
+            child: _circle(pupil, Colors.white),
+          ),
+          // Boca
+          Positioned(
+            top: size * 0.46,
+            child: Container(
+              width: head * 0.24,
+              height: head * 0.12,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFF5A76),
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _circle(double size, Color color) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(size / 2),
+      ),
+    );
+  }
 }

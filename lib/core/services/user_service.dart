@@ -43,6 +43,9 @@ class UserService extends ChangeNotifier {
       _setLoading(true);
       _clearError();
 
+      // Asegurar un estado limpio antes de iniciar sesión nuevamente
+      try { await _googleSignIn.signOut(); } catch (_) {}
+
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
         _setError('Inicio de sesión cancelado');

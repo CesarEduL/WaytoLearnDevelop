@@ -9,7 +9,6 @@ import 'core/services/story_service.dart';
 import 'core/providers/user_provider.dart';
 import 'presentation/screens/splash_screen.dart';
 import 'core/theme/app_theme.dart';
-import 'package:firebase_app_check/firebase_app_check.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,14 +20,6 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
-  // App Check opcional controlado por .env (APP_CHECK=debug|play|off)
-  final appCheckMode = dotenv.env['APP_CHECK']?.toLowerCase();
-  if (appCheckMode == 'debug') {
-    await FirebaseAppCheck.instance.activate(androidProvider: AndroidProvider.debug);
-  } else if (appCheckMode == 'play') {
-    await FirebaseAppCheck.instance.activate(androidProvider: AndroidProvider.playIntegrity);
-  }
 
   runApp(const WaytoLearnApp());
 }
