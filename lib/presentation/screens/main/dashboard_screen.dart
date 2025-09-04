@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/services/user_service.dart';
+import '../../../core/services/orientation_service.dart';
 import '../../../core/models/user_model.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/orientation_aware_widget.dart';
 import '../profile/profile_screen.dart';
 import '../profile/progress_reports_screen.dart';
 import '../splash_screen.dart';
@@ -29,6 +31,8 @@ class _DashboardScreenState extends State<DashboardScreen>
     super.initState();
     _initializeAnimations();
     _startAnimations();
+    // Asegurar que la orientación horizontal esté configurada
+    OrientationService().setLandscapeOnly();
   }
 
   void _initializeAnimations() {
@@ -91,111 +95,114 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
-      drawer: _buildDrawer(context),
-      body: SafeArea(
-        child: Consumer<UserService>(
-          builder: (context, userService, child) {
-            final user = userService.currentUser;
-            
-            if (user == null) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
+    return OrientationAwareWidget(
+      forceLandscape: true,
+      child: Scaffold(
+        backgroundColor: AppTheme.backgroundColor,
+        drawer: _buildDrawer(context),
+        body: SafeArea(
+          child: Consumer<UserService>(
+            builder: (context, userService, child) {
+              final user = userService.currentUser;
+              
+              if (user == null) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
 
-            return CustomScrollView(
-              slivers: [
-                // AppBar personalizado con osito
-                _buildCustomAppBar(user),
-                
-                // Contenido principal
-                SliverPadding(
-                  padding: const EdgeInsets.all(16.0),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      // Tarjeta de progreso general
-                      SlideTransition(
-                        position: _slideAnimation,
-                        child: FadeTransition(
-                          opacity: _fadeAnimation,
-                          child: _buildProgressCard(user, userService),
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // Tarjeta de nivel actual con osito
-                      SlideTransition(
-                        position: _slideAnimation,
-                        child: FadeTransition(
-                          opacity: _fadeAnimation,
-                          child: _buildLevelCard(user),
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // Recomendaciones diarias
-                      SlideTransition(
-                        position: _slideAnimation,
-                        child: FadeTransition(
-                          opacity: _fadeAnimation,
-                          child: _buildDailyRecommendations(),
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // Mundos para explorar
-                      SlideTransition(
-                        position: _slideAnimation,
-                        child: FadeTransition(
-                          opacity: _fadeAnimation,
-                          child: _buildWorldsSection(),
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // Temas (grid de materias)
-                      SlideTransition(
-                        position: _slideAnimation,
-                        child: FadeTransition(
-                          opacity: _fadeAnimation,
-                          child: _buildSubjectsSection(context),
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // Logros recientes
-                      if (user.achievements.isNotEmpty)
+              return CustomScrollView(
+                slivers: [
+                  // AppBar personalizado con osito
+                  _buildCustomAppBar(user),
+                  
+                  // Contenido principal
+                  SliverPadding(
+                    padding: const EdgeInsets.all(16.0),
+                    sliver: SliverList(
+                      delegate: SliverChildListDelegate([
+                        // Tarjeta de progreso general
                         SlideTransition(
                           position: _slideAnimation,
                           child: FadeTransition(
                             opacity: _fadeAnimation,
-                            child: _buildAchievementsSection(user),
+                            child: _buildProgressCard(user, userService),
                           ),
                         ),
 
-                      const SizedBox(height: 20),
+                        const SizedBox(height: 20),
 
-                      // Estadísticas rápidas
-                      SlideTransition(
-                        position: _slideAnimation,
-                        child: FadeTransition(
-                          opacity: _fadeAnimation,
-                          child: _buildStatsSection(user),
+                        // Tarjeta de nivel actual con osito
+                        SlideTransition(
+                          position: _slideAnimation,
+                          child: FadeTransition(
+                            opacity: _fadeAnimation,
+                            child: _buildLevelCard(user),
+                          ),
                         ),
-                      ),
-                    ]),
+
+                        const SizedBox(height: 20),
+
+                        // Recomendaciones diarias
+                        SlideTransition(
+                          position: _slideAnimation,
+                          child: FadeTransition(
+                            opacity: _fadeAnimation,
+                            child: _buildDailyRecommendations(),
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // Mundos para explorar
+                        SlideTransition(
+                          position: _slideAnimation,
+                          child: FadeTransition(
+                            opacity: _fadeAnimation,
+                            child: _buildWorldsSection(),
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // Temas (grid de materias)
+                        SlideTransition(
+                          position: _slideAnimation,
+                          child: FadeTransition(
+                            opacity: _fadeAnimation,
+                            child: _buildSubjectsSection(context),
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // Logros recientes
+                        if (user.achievements.isNotEmpty)
+                          SlideTransition(
+                            position: _slideAnimation,
+                            child: FadeTransition(
+                              opacity: _fadeAnimation,
+                              child: _buildAchievementsSection(user),
+                            ),
+                          ),
+
+                        const SizedBox(height: 20),
+
+                        // Estadísticas rápidas
+                        SlideTransition(
+                          position: _slideAnimation,
+                          child: FadeTransition(
+                            opacity: _fadeAnimation,
+                            child: _buildStatsSection(user),
+                          ),
+                        ),
+                      ]),
+                    ),
                   ),
-                ),
-              ],
-            );
-          },
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
@@ -468,6 +475,7 @@ class _DashboardScreenState extends State<DashboardScreen>
         _buildSectionHeader(icon: Icons.school, color: AppTheme.primaryColor, title: 'Temas'),
         const SizedBox(height: 16),
         
+        // Layout mejorado para orientación horizontal
         Row(
           children: [
             Expanded(
@@ -711,7 +719,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
   }
 
-  Widget _buildStatsSection(UserModel user) {
+    Widget _buildStatsSection(UserModel user) {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(
@@ -730,11 +738,11 @@ class _DashboardScreenState extends State<DashboardScreen>
                     color: AppTheme.primaryColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                                     child: const Icon(
-                     Icons.analytics,
-                     color: AppTheme.primaryColor,
-                     size: 24,
-                   ),
+                  child: const Icon(
+                    Icons.analytics,
+                    color: AppTheme.primaryColor,
+                    size: 24,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Text(
@@ -748,6 +756,7 @@ class _DashboardScreenState extends State<DashboardScreen>
             ),
             const SizedBox(height: 16),
             
+            // Layout mejorado para orientación horizontal
             Row(
               children: [
                 Expanded(
@@ -849,14 +858,15 @@ class _DashboardScreenState extends State<DashboardScreen>
             child: const Text('Cancelar'),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              Provider.of<UserService>(context, listen: false).signOut().then((_) {
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (_) => const SplashScreen()),
-                  (route) => false,
-                );
-              });
+              // Cambiar a orientación vertical antes de ir al splash screen
+              await OrientationService().setPortraitOnly();
+              await Provider.of<UserService>(context, listen: false).signOut();
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const SplashScreen()),
+                (route) => false,
+              );
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.primaryColor,

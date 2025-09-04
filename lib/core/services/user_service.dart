@@ -7,9 +7,7 @@ import '../models/user_model.dart';
 
 class UserService extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn(
-    serverClientId: dotenv.env['FIREBASE_WEB_CLIENT_ID'],
-  );
+  bool _googleInitialized = false;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   UserModel? _currentUser;
@@ -43,19 +41,37 @@ class UserService extends ChangeNotifier {
       _setLoading(true);
       _clearError();
 
-      // Asegurar un estado limpio antes de iniciar sesión nuevamente
-      try { await _googleSignIn.signOut(); } catch (_) {}
+      // Inicializar Google Sign-In (solo una vez)
+      if (!_googleInitialized) {
+        await GoogleSignIn.instance.initialize(
+          serverClientId: dotenv.env['FIREBASE_WEB_CLIENT_ID'],
+        );
+        _googleInitialized = true;
+      }
 
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) {
-        _setError('Inicio de sesión cancelado');
+      // Iniciar sesión interactiva
+      GoogleSignInAccount googleUser;
+      try {
+        googleUser = await GoogleSignIn.instance.authenticate();
+      } on GoogleSignInException catch (e) {
+        if (e.code == GoogleSignInExceptionCode.canceled ||
+            e.code == GoogleSignInExceptionCode.interrupted ||
+            e.code == GoogleSignInExceptionCode.uiUnavailable) {
+          _setError('Inicio de sesión cancelado');
+          return false;
+        }
+        rethrow;
+      }
+
+      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+      final String? idToken = googleAuth.idToken;
+      if (idToken == null) {
+        _setError('No se obtuvo idToken de Google');
         return false;
       }
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
+        idToken: idToken,
       );
 
       final UserCredential userCredential = await _auth.signInWithCredential(credential);
@@ -166,8 +182,9 @@ class UserService extends ChangeNotifier {
       _setLoading(true);
       _clearError();
 
-      // Cerrar sesión únicamente con Firebase para simplificar y evitar fallos
+      // Cerrar sesión Firebase y Google
       await _auth.signOut();
+      try { await GoogleSignIn.instance.signOut(); } catch (_) {}
 
       _currentUser = null;
       notifyListeners();

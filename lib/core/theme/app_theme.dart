@@ -112,13 +112,13 @@ class AppTheme {
         ),
       ),
       
-      // Tarjetas
-      cardTheme: CardTheme(
+      // Tarjetas (Material 3 usa CardThemeData)
+      cardTheme: const CardThemeData(
         color: cardColor,
         elevation: 4,
-        shadowColor: Colors.black.withOpacity(0.1),
+        shadowColor: Color(0x1A000000),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.all(Radius.circular(16)),
         ),
       ),
       

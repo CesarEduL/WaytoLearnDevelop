@@ -7,9 +7,6 @@ import '../models/user_model.dart';
 
 class AuthProvider extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn(
-    serverClientId: dotenv.env['FIREBASE_WEB_CLIENT_ID'],
-  );
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   User? get currentUser => _auth.currentUser;
@@ -54,17 +51,21 @@ class AuthProvider extends ChangeNotifier {
       _setLoading(true);
       _clearError();
 
+      // Inicializar Google Sign-In
+      await GoogleSignIn.instance.initialize(
+        serverClientId: dotenv.env['FIREBASE_WEB_CLIENT_ID'],
+      );
+
       // Iniciar el flujo de Google Sign In
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      final GoogleSignInAccount? googleUser = await GoogleSignIn.instance.authenticate();
       if (googleUser == null) {
         _setLoading(false);
         return false;
       }
 
       // Obtener las credenciales de autenticación
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 

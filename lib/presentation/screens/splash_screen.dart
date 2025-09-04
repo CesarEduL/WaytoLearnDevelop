@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/services/user_service.dart';
+import '../../core/services/orientation_service.dart';
 import '../../core/theme/app_theme.dart';
 import 'auth/login_screen.dart';
 import 'main/dashboard_screen.dart';
@@ -27,6 +28,8 @@ class _SplashScreenState extends State<SplashScreen>
     super.initState();
     _initializeAnimations();
     _startAnimations();
+    // Configurar orientación vertical para el splash screen
+    OrientationService().setPortraitOnly();
   }
 
   void _initializeAnimations() {
@@ -104,8 +107,11 @@ class _SplashScreenState extends State<SplashScreen>
     _navigateToNextScreen();
   }
 
-  void _navigateToNextScreen() {
+  void _navigateToNextScreen() async {
     final userService = Provider.of<UserService>(context, listen: false);
+    
+    // Cambiar a orientación horizontal antes de navegar
+    await OrientationService().setLandscapeOnly();
     
     if (userService.isAuthenticated) {
       Navigator.of(context).pushReplacement(
@@ -148,24 +154,31 @@ class _SplashScreenState extends State<SplashScreen>
                 // Partículas de fondo animadas
                 _buildBackgroundParticles(),
                 
-                // Contenido principal
-                Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Logo animado (placeholder Panda)
-                      _buildAnimatedPanda(),
-                      
-                      const SizedBox(height: 50),
-                      
-                      // Título de la aplicación
-                      _buildAnimatedTitle(),
-                      
-                      const SizedBox(height: 60),
-                      
-                      // Indicador de carga personalizado
-                      _buildCustomLoadingIndicator(),
-                    ],
+                // Contenido principal con SafeArea y padding
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Center(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // Logo animado (placeholder Panda)
+                            _buildAnimatedPanda(),
+                            
+                            const SizedBox(height: 30),
+                            
+                            // Título de la aplicación
+                            _buildAnimatedTitle(),
+                            
+                            const SizedBox(height: 40),
+                            
+                            // Indicador de carga personalizado
+                            _buildCustomLoadingIndicator(),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -195,11 +208,16 @@ class _SplashScreenState extends State<SplashScreen>
     return AnimatedBuilder(
       animation: _logoController,
       builder: (context, child) {
+        // Calcular tamaño responsive basado en el ancho de la pantalla
+        final screenWidth = MediaQuery.of(context).size.width;
+        final screenHeight = MediaQuery.of(context).size.height;
+        final pandaSize = (screenWidth * 0.4).clamp(120.0, 200.0);
+        
         return Transform.scale(
           scale: _logoAnimation.value,
           child: Transform.rotate(
             angle: _logoAnimation.value * 0.03,
-            child: _PandaPlaceholder(size: 200),
+            child: _PandaPlaceholder(size: pandaSize),
           ),
         );
       },
@@ -210,6 +228,11 @@ class _SplashScreenState extends State<SplashScreen>
     return AnimatedBuilder(
       animation: _textController,
       builder: (context, child) {
+        // Calcular tamaños responsive
+        final screenWidth = MediaQuery.of(context).size.width;
+        final titleFontSize = (screenWidth * 0.08).clamp(28.0, 44.0);
+        final subtitleFontSize = (screenWidth * 0.04).clamp(14.0, 20.0);
+        
         return Opacity(
           opacity: _textAnimation.value,
           child: Transform.translate(
@@ -222,7 +245,7 @@ class _SplashScreenState extends State<SplashScreen>
                   style: Theme.of(context).textTheme.displayMedium?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w800,
-                    fontSize: 44,
+                    fontSize: titleFontSize,
                     shadows: const [
                       Shadow(
                         color: Colors.black54,
@@ -231,6 +254,7 @@ class _SplashScreenState extends State<SplashScreen>
                       ),
                     ],
                   ),
+                  textAlign: TextAlign.center,
                 ),
                 
                 const SizedBox(height: 12),
@@ -251,6 +275,7 @@ class _SplashScreenState extends State<SplashScreen>
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.w500,
+                      fontSize: subtitleFontSize,
                       shadows: const [
                         Shadow(
                           color: Colors.black54,
@@ -259,6 +284,7 @@ class _SplashScreenState extends State<SplashScreen>
                         ),
                       ],
                     ),
+                    textAlign: TextAlign.center,
                   ),
                 ),
               ],

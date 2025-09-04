@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/services/user_service.dart';
+import '../../../core/services/orientation_service.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/orientation_aware_widget.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -24,6 +26,8 @@ class _LoginScreenState extends State<LoginScreen>
     super.initState();
     _initializeAnimations();
     _startAnimations();
+    // Asegurar que la orientación horizontal esté configurada
+    OrientationService().setLandscapeOnly();
   }
 
   void _initializeAnimations() {
@@ -86,62 +90,126 @@ class _LoginScreenState extends State<LoginScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppTheme.primaryColor,
-              AppTheme.backgroundColor,
-            ],
+    return OrientationAwareWidget(
+      forceLandscape: true,
+      child: Scaffold(
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                AppTheme.primaryColor,
+                AppTheme.backgroundColor,
+              ],
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: Stack(
-            children: [
-              // Partículas de fondo
-              _buildBackgroundParticles(),
-              
-              // Contenido principal
-              Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  children: [
-                    // Header con logo y título
-                    Expanded(
-                      flex: 2,
-                      child: FadeTransition(
-                        opacity: _fadeAnimation,
+          child: SafeArea(
+            child: Stack(
+              children: [
+                // Partículas de fondo
+                _buildBackgroundParticles(),
+                
+                // Contenido principal responsive
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final screenWidth = constraints.maxWidth;
+                    final screenHeight = constraints.maxHeight;
+                    
+                    // Si la pantalla es muy pequeña, usar layout vertical
+                    if (screenWidth < 600) {
+                      return SingleChildScrollView(
+                        padding: const EdgeInsets.all(20.0),
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            _buildAnimatedBearLogo(),
-                            const SizedBox(height: 24),
-                            _buildWelcomeTitle(),
-                            const SizedBox(height: 12),
-                            _buildWelcomeSubtitle(),
+                            // Logo y título
+                            FadeTransition(
+                              opacity: _fadeAnimation,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  _buildAnimatedBearLogo(),
+                                  const SizedBox(height: 20),
+                                  _buildWelcomeTitle(),
+                                  const SizedBox(height: 10),
+                                  _buildWelcomeSubtitle(),
+                                ],
+                              ),
+                            ),
+                            
+                            const SizedBox(height: 40),
+                            
+                            // Botones de login
+                            SlideTransition(
+                              position: _slideAnimation,
+                              child: FadeTransition(
+                                opacity: _fadeAnimation,
+                                child: _buildLoginSection(),
+                              ),
+                            ),
                           ],
                         ),
-                      ),
-                    ),
+                      );
+                    }
+                    
+                    // Layout horizontal para pantallas más grandes
+                    return Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Row(
+                        children: [
+                          // Lado izquierdo - Logo y título
+                          Expanded(
+                            flex: 1,
+                            child: FadeTransition(
+                              opacity: _fadeAnimation,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  _buildAnimatedBearLogo(),
+                                  const SizedBox(height: 24),
+                                  _buildWelcomeTitle(),
+                                  const SizedBox(height: 12),
+                                  _buildWelcomeSubtitle(),
+                                ],
+                              ),
+                            ),
+                          ),
 
-                    // Botones de login
-                    Expanded(
-                      flex: 1,
-                      child: SlideTransition(
-                        position: _slideAnimation,
-                        child: FadeTransition(
-                          opacity: _fadeAnimation,
-                          child: _buildLoginSection(),
-                        ),
+                          // Separador vertical
+                          Container(
+                            width: 2,
+                            margin: const EdgeInsets.symmetric(horizontal: 32),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.white.withOpacity(0.3),
+                                  Colors.white.withOpacity(0.1),
+                                  Colors.white.withOpacity(0.3),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                          // Lado derecho - Botones de login
+                          Expanded(
+                            flex: 1,
+                            child: SlideTransition(
+                              position: _slideAnimation,
+                              child: FadeTransition(
+                                opacity: _fadeAnimation,
+                                child: _buildLoginSection(),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
+                    );
+                  },
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -156,11 +224,16 @@ class _LoginScreenState extends State<LoginScreen>
     return AnimatedBuilder(
       animation: _bearController,
       builder: (context, child) {
+        // Calcular tamaño responsive
+        final screenWidth = MediaQuery.of(context).size.width;
+        final logoSize = (screenWidth * 0.15).clamp(100.0, 140.0);
+        final innerSize = (logoSize * 0.5).clamp(50.0, 72.0);
+        
         return Transform.scale(
           scale: _bearAnimation.value,
           child: Container(
-            width: 140,
-            height: 140,
+            width: logoSize,
+            height: logoSize,
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(24),
@@ -175,8 +248,8 @@ class _LoginScreenState extends State<LoginScreen>
             ),
             child: Center(
               child: Container(
-                width: 72,
-                height: 72,
+                width: innerSize,
+                height: innerSize,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
@@ -195,12 +268,12 @@ class _LoginScreenState extends State<LoginScreen>
                     ),
                   ],
                 ),
-                child: const Center(
+                child: Center(
                   child: Text(
                     'W',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 28,
+                      fontSize: innerSize * 0.4,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 1.0,
                     ),
@@ -215,12 +288,16 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   Widget _buildWelcomeTitle() {
+    // Calcular tamaño responsive
+    final screenWidth = MediaQuery.of(context).size.width;
+    final titleFontSize = (screenWidth * 0.04).clamp(20.0, 28.0);
+    
     return Text(
       '¡Bienvenido a WaytoLearn!',
       style: Theme.of(context).textTheme.headlineMedium?.copyWith(
         color: Colors.white,
         fontWeight: FontWeight.bold,
-        fontSize: 28,
+        fontSize: titleFontSize,
         shadows: const [
           Shadow(
             color: Colors.black54,
@@ -234,6 +311,10 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   Widget _buildWelcomeSubtitle() {
+    // Calcular tamaño responsive
+    final screenWidth = MediaQuery.of(context).size.width;
+    final subtitleFontSize = (screenWidth * 0.025).clamp(14.0, 18.0);
+    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
@@ -249,6 +330,7 @@ class _LoginScreenState extends State<LoginScreen>
         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
           color: Colors.white,
           fontWeight: FontWeight.w500,
+          fontSize: subtitleFontSize,
           shadows: const [
             Shadow(
               color: Colors.black54,
@@ -265,12 +347,36 @@ class _LoginScreenState extends State<LoginScreen>
   Widget _buildLoginSection() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
+        // Título de la sección de login
+        Text(
+          'Iniciar Sesión',
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 24,
+            shadows: const [
+              Shadow(
+                color: Colors.black54,
+                offset: Offset(0, 2),
+                blurRadius: 4,
+              ),
+            ],
+          ),
+        ),
+        
+        const SizedBox(height: 32),
+
         // Botón de Google Sign In
         Consumer<UserService>(
           builder: (context, userService, child) {
+            // Calcular tamaño responsive
+            final screenWidth = MediaQuery.of(context).size.width;
+            final buttonWidth = (screenWidth * 0.3).clamp(250.0, 350.0);
+            
             return Container(
-              width: double.infinity,
+              width: buttonWidth,
               height: 60,
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -438,6 +544,8 @@ class _LoginScreenState extends State<LoginScreen>
       final success = await userService.signInWithGoogle();
       
       if (success && mounted) {
+        // Asegurar orientación horizontal antes de ir al dashboard
+        await OrientationService().setLandscapeOnly();
         // Ir al dashboard tras iniciar sesión correctamente
         Navigator.of(context).popUntil((route) => route.isFirst);
       } else if (mounted) {
