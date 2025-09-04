@@ -99,7 +99,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     return OrientationAwareWidget(
       forceLandscape: true,
       child: Scaffold(
-        backgroundColor: AppTheme.backgroundColor,
+        backgroundColor: const Color(0xFFF8FAFC), // Fondo más suave
         drawer: _buildDrawer(context),
         body: SafeArea(
           child: Consumer<UserService>(
@@ -122,87 +122,87 @@ class _DashboardScreenState extends State<DashboardScreen>
 
               return CustomScrollView(
                 slivers: [
-                  // AppBar personalizado con osito
-                  _buildCustomAppBar(user),
+                  // AppBar modernizado con glassmorphism
+                  _buildModernAppBar(user),
                   
-                  // Contenido principal
+                  // Contenido principal con mejor espaciado
                   SliverPadding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 20.0),
                     sliver: SliverList(
                       delegate: SliverChildListDelegate([
-                        // Tarjeta de progreso general
+                        // Tarjeta de progreso mejorada
                         SlideTransition(
                           position: _slideAnimation,
                           child: FadeTransition(
                             opacity: _fadeAnimation,
-                            child: _buildProgressCard(user, userService),
+                            child: _buildModernProgressCard(user, userService),
                           ),
                         ),
 
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 24),
 
-                        // Tarjeta de nivel actual con osito
+                        // Sección de nivel y estadísticas rápidas
                         SlideTransition(
                           position: _slideAnimation,
                           child: FadeTransition(
                             opacity: _fadeAnimation,
-                            child: _buildLevelCard(user),
+                            child: _buildQuickStatsSection(user),
                           ),
                         ),
 
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 24),
 
-                        // Recomendaciones diarias
+                        // Temas con diseño mejorado
                         SlideTransition(
                           position: _slideAnimation,
                           child: FadeTransition(
                             opacity: _fadeAnimation,
-                            child: _buildDailyRecommendations(),
+                            child: _buildModernSubjectsSection(context),
                           ),
                         ),
 
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 24),
 
-                        // Mundos para explorar
+                        // Recomendaciones diarias modernizadas
                         SlideTransition(
                           position: _slideAnimation,
                           child: FadeTransition(
                             opacity: _fadeAnimation,
-                            child: _buildWorldsSection(),
+                            child: _buildModernDailyRecommendations(),
                           ),
                         ),
 
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 24),
 
-                        // Temas (grid de materias)
+                        // Mundos para explorar con mejor diseño
                         SlideTransition(
                           position: _slideAnimation,
                           child: FadeTransition(
                             opacity: _fadeAnimation,
-                            child: _buildSubjectsSection(context),
+                            child: _buildModernWorldsSection(),
                           ),
                         ),
 
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 24),
 
-                        // Logros recientes
+                        // Logros recientes mejorados
                         if (user.achievements.isNotEmpty)
                           SlideTransition(
                             position: _slideAnimation,
                             child: FadeTransition(
                               opacity: _fadeAnimation,
-                              child: _buildAchievementsSection(user),
+                              child: _buildModernAchievementsSection(user),
                             ),
                           ),
 
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 24),
 
-                        // Estadísticas rápidas
+                        // Estadísticas detalladas
                         SlideTransition(
                           position: _slideAnimation,
                           child: FadeTransition(
                             opacity: _fadeAnimation,
-                            child: _buildStatsSection(user),
+                            child: _buildModernStatsSection(user),
                           ),
                         ),
                       ]),
@@ -217,109 +217,161 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
   }
 
-  Widget _buildCustomAppBar(UserModel user) {
+  Widget _buildModernAppBar(UserModel user) {
     return SliverAppBar(
-      expandedHeight: 140,
+      expandedHeight: 80, // Reducido de 160 a 80
       floating: false,
       pinned: true,
-      backgroundColor: AppTheme.primaryColor,
-      flexibleSpace: FlexibleSpaceBar(
-        title: FadeTransition(
-          opacity: _fadeAnimation,
-          child: Text(
-            '¡Hola, ${user.name}!',
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-            ),
-          ),
-        ),
-        background: Stack(
-          children: [
-            Container(
-              decoration: const BoxDecoration(
-                gradient: AppTheme.primaryGradient,
-              ),
-            ),
-            // Osito decorativo en el fondo
-            Positioned(
-              right: 20,
-              bottom: 20,
-              child: AnimatedBuilder(
-                animation: _bearAnimation,
-                builder: (context, child) {
-                  return Transform.scale(
-                    scale: _bearAnimation.value,
-                    child: Transform.rotate(
-                      angle: _bearAnimation.value * 0.1,
-                      child: Container(
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(30),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.3),
-                            width: 2,
-                          ),
-                        ),
-                        child: const Icon(
-                          Icons.face,
-                          color: Colors.white,
-                          size: 30,
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      leading: Container(
+        margin: const EdgeInsets.only(left: 8),
+        decoration: BoxDecoration(
+          color: AppTheme.primaryColor.withOpacity(0.9), // Color del botón sidebar
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
           ],
         ),
-      ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.person, color: Colors.white),
+        child: IconButton(
+          icon: const Icon(Icons.menu, color: Colors.white),
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const ProfileScreen(),
-              ),
-            );
+            Scaffold.of(context).openDrawer();
           },
         ),
-        IconButton(
-          icon: const Icon(Icons.logout, color: Colors.white),
-          onPressed: () => _showLogoutDialog(context),
+      ),
+      flexibleSpace: FlexibleSpaceBar(
+                 background: Container(
+           decoration: BoxDecoration(
+             color: Colors.transparent,
+           ),
+          child: Stack(
+            children: [
+              // Patrón de fondo moderno
+              Positioned.fill(
+                child: CustomPaint(
+                  painter: ModernPatternPainter(),
+                ),
+              ),
+                             // Elementos decorativos
+              // Círculos decorativos
+              Positioned(
+                top: 40,
+                left: 40,
+                child: Container(
+                  width: 20,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 80,
+                right: 80,
+                child: Container(
+                  width: 15,
+                  height: 15,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        Container(
+          margin: const EdgeInsets.only(right: 8),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.9),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: IconButton(
+            icon: const Icon(Icons.person, color: AppTheme.primaryColor),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const ProfileScreen(),
+                ),
+              );
+            },
+          ),
+        ),
+        Container(
+          margin: const EdgeInsets.only(right: 16),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.9),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: IconButton(
+            icon: const Icon(Icons.logout, color: AppTheme.primaryColor),
+            onPressed: () => _showLogoutDialog(context),
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildProgressCard(UserModel user, UserService userService) {
-    return Card(
-      elevation: 8,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          gradient: AppTheme.primaryGradient,
+  Widget _buildModernProgressCard(UserModel user, UserService userService) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppTheme.primaryColor,
+            AppTheme.primaryColor.withOpacity(0.9),
+            AppTheme.secondaryColor.withOpacity(0.7),
+          ],
         ),
-        padding: const EdgeInsets.all(20),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primaryColor.withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.3),
+                      width: 1,
+                    ),
                   ),
                   child: const Icon(
                     Icons.trending_up,
@@ -327,148 +379,112 @@ class _DashboardScreenState extends State<DashboardScreen>
                     size: 28,
                   ),
                 ),
-                const SizedBox(width: 12),
-                Text(
-                  'Tu Progreso',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Tu Progreso',
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'Nivel ${user.currentLevel} • ${user.totalPoints} puntos',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.8),
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Text(
+                    '${(user.levelProgress * 100).round()}%',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             
-            // Barra de progreso general
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Nivel ${user.currentLevel}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Text(
-                      '${(user.levelProgress * 100).round()}%',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  height: 10,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(5),
-                    color: Colors.white.withOpacity(0.3),
-                  ),
-                  child: FractionallySizedBox(
+            // Barra de progreso mejorada
+            Container(
+              height: 12,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(6),
+                color: Colors.white.withOpacity(0.2),
+              ),
+              child: Stack(
+                children: [
+                  FractionallySizedBox(
                     alignment: Alignment.centerLeft,
                     widthFactor: user.levelProgress,
                     child: Container(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
+                        borderRadius: BorderRadius.circular(6),
                         gradient: LinearGradient(
-                          colors: [Colors.white, Colors.white.withOpacity(0.8)],
+                          colors: [
+                            Colors.white,
+                            Colors.white.withOpacity(0.9),
+                          ],
                         ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.white.withOpacity(0.3),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '${user.experiencePoints} / ${user.experienceToNextLevel} XP',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.8),
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLevelCard(UserModel user) {
-    return Card(
-      elevation: 6,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          children: [
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: AppTheme.primaryColor,
-                borderRadius: BorderRadius.circular(15),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppTheme.primaryColor.withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.star,
-                color: Colors.white,
-                size: 30,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Nivel ${user.currentLevel}',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.primaryColor,
+                  // Indicador de progreso con brillo
+                  if (user.levelProgress > 0)
+                    Positioned(
+                      left: (user.levelProgress * 100) - 2,
+                      top: 0,
+                      child: Container(
+                        width: 4,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(2),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.white.withOpacity(0.8),
+                              blurRadius: 8,
+                              spreadRadius: 2,
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                  Text(
-                    '¡Excelente trabajo!',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppTheme.textSecondary,
-                    ),
-                  ),
                 ],
               ),
             ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: AppTheme.accentColor,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppTheme.accentColor.withOpacity(0.3),
-                    blurRadius: 6,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: Text(
-                '${user.totalPoints} pts',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                ),
+            const SizedBox(height: 12),
+            Text(
+              '${user.experiencePoints} / ${user.experienceToNextLevel} XP para el siguiente nivel',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.8),
+                fontSize: 13,
               ),
             ),
           ],
@@ -477,32 +493,136 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
   }
 
-  Widget _buildSubjectsSection(BuildContext context) {
+  Widget _buildQuickStatsSection(UserModel user) {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildQuickStatCard(
+            'Nivel Actual',
+            '${user.currentLevel}',
+            Icons.star,
+            AppTheme.primaryColor,
+            '¡Excelente trabajo!',
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: _buildQuickStatCard(
+            'Total Puntos',
+            '${user.totalPoints}',
+            Icons.emoji_events,
+            AppTheme.accentColor,
+            'Puntos acumulados',
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: _buildQuickStatCard(
+            'Experiencia',
+            '${user.experiencePoints}',
+            Icons.flash_on,
+            AppTheme.secondaryColor,
+            'XP ganados',
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQuickStatCard(String title, String value, IconData icon, Color color, String subtitle) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.1),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+        border: Border.all(
+          color: color.withOpacity(0.1),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(
+              icon,
+              color: color,
+              size: 28,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            subtitle,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppTheme.textSecondary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModernSubjectsSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader(icon: Icons.school, color: AppTheme.primaryColor, title: 'Temas'),
-        const SizedBox(height: 16),
+        _buildModernSectionHeader(
+          icon: Icons.school,
+          color: AppTheme.primaryColor,
+          title: 'Temas de Aprendizaje',
+          subtitle: 'Explora diferentes materias',
+        ),
+        const SizedBox(height: 20),
         
-        // Layout mejorado para orientación horizontal
         Row(
           children: [
             Expanded(
-              child: _buildSubjectCard(
+              child: _buildModernSubjectCard(
                 context,
                 'Matemáticas',
                 Icons.calculate,
                 AppTheme.primaryColor,
+                'Números y operaciones',
                 () => _navigateToSubject(context, 'mathematics'),
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 20),
             Expanded(
-              child: _buildSubjectCard(
+              child: _buildModernSubjectCard(
                 context,
                 'Comunicación',
                 Icons.chat_bubble,
                 AppTheme.secondaryColor,
+                'Lenguaje y expresión',
                 () => _navigateToSubject(context, 'communication'),
               ),
             ),
@@ -512,44 +632,186 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
   }
 
-  Widget _buildSectionHeader({required IconData icon, required Color color, required String title}) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
+  Widget _buildModernSectionHeader({required IconData icon, required Color color, required String title, required String subtitle}) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
             color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
-          child: Icon(icon, color: color, size: 24),
-        ),
-        const SizedBox(width: 12),
-        Text(
-          title,
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: AppTheme.textPrimary,
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(icon, color: color, size: 28),
           ),
-        ),
-      ],
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildDailyRecommendations() {
+  Widget _buildModernSubjectCard(
+    BuildContext context,
+    String title,
+    IconData icon,
+    Color color,
+    String description,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 160,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              color,
+              color.withOpacity(0.8),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.3),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            // Patrón de fondo
+            Positioned(
+              top: -20,
+              right: -20,
+              child: Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+            // Contenido
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Icon(
+                      icon,
+                      size: 32,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    description,
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.9),
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Indicador de acción
+            Positioned(
+              bottom: 20,
+              right: 20,
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.arrow_forward,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModernDailyRecommendations() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader(icon: Icons.recommend, color: AppTheme.secondaryColor, title: 'Tus recomendaciones diarias'),
-        const SizedBox(height: 12),
+        _buildModernSectionHeader(
+          icon: Icons.recommend,
+          color: AppTheme.secondaryColor,
+          title: 'Recomendaciones Diarias',
+          subtitle: 'Actividades personalizadas para ti',
+        ),
+        const SizedBox(height: 16),
         SizedBox(
-          height: 150,
+          height: 180,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: 5,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            separatorBuilder: (_, __) => const SizedBox(width: 16),
             itemBuilder: (context, index) {
               final locked = index != 0;
-              return _RecommendationTile(locked: locked, label: locked ? 'Locked' : 'Division');
+              return _ModernRecommendationTile(
+                locked: locked,
+                label: locked ? 'Bloqueado' : 'División',
+                color: AppTheme.secondaryColor,
+              );
             },
           ),
         ),
@@ -557,18 +819,23 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
   }
 
-  Widget _buildWorldsSection() {
+  Widget _buildModernWorldsSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader(icon: Icons.public, color: AppTheme.accentColor, title: 'Mundos para explorar'),
-        const SizedBox(height: 12),
+        _buildModernSectionHeader(
+          icon: Icons.public,
+          color: AppTheme.accentColor,
+          title: 'Mundos para Explorar',
+          subtitle: 'Descubre nuevos temas',
+        ),
+        const SizedBox(height: 16),
         SizedBox(
-          height: 86,
+          height: 100,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: 6,
-            separatorBuilder: (_, __) => const SizedBox(width: 14),
+            separatorBuilder: (_, __) => const SizedBox(width: 16),
             itemBuilder: (context, i) {
               final colors = [
                 const Color(0xFF60A5FA),
@@ -579,13 +846,225 @@ class _DashboardScreenState extends State<DashboardScreen>
                 const Color(0xFF22D3EE),
               ];
               final c = colors[i % colors.length];
-              return CircleAvatar(
-                radius: 36,
-                backgroundColor: Colors.white,
-                child: CircleAvatar(radius: 34, backgroundColor: c, child: const Icon(Icons.tag_faces, color: Colors.white)),
+              return Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: c.withOpacity(0.2),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Container(
+                  margin: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: c,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Icon(
+                    Icons.tag_faces,
+                    color: Colors.white,
+                    size: 32,
+                  ),
+                ),
               );
             },
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildModernAchievementsSection(UserModel user) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildModernSectionHeader(
+          icon: Icons.emoji_events,
+          color: AppTheme.goldColor,
+          title: 'Logros Desbloqueados',
+          subtitle: 'Tus conquistas',
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          height: 100,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: user.achievements.length,
+            itemBuilder: (context, index) {
+              return Container(
+                width: 100,
+                margin: const EdgeInsets.only(right: 16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppTheme.goldColor,
+                      AppTheme.goldColor.withOpacity(0.8),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.goldColor.withOpacity(0.3),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.emoji_events,
+                      color: Colors.white,
+                      size: 28,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Logro ${index + 1}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildModernStatsSection(UserModel user) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primaryColor.withOpacity(0.1),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(
+                  Icons.analytics,
+                  color: AppTheme.primaryColor,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Estadísticas Detalladas',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      'Resumen de tu progreso',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppTheme.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: _buildModernStatItem(
+                  'Total Puntos',
+                  '${user.totalPoints}',
+                  Icons.stars,
+                  AppTheme.primaryColor,
+                ),
+              ),
+              Expanded(
+                child: _buildModernStatItem(
+                  'Nivel',
+                  '${user.currentLevel}',
+                  Icons.trending_up,
+                  AppTheme.accentColor,
+                ),
+              ),
+              Expanded(
+                child: _buildModernStatItem(
+                  'Experiencia',
+                  '${user.experiencePoints}',
+                  Icons.flash_on,
+                  AppTheme.secondaryColor,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModernStatItem(String label, String value, IconData icon, Color color) {
+    return Column(
+      children: [
+        Container(
+          width: 60,
+          height: 60,
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Icon(
+            icon,
+            color: color,
+            size: 28,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: AppTheme.textSecondary,
+          ),
+          textAlign: TextAlign.center,
         ),
       ],
     );
@@ -930,27 +1409,45 @@ class _DashboardScreenState extends State<DashboardScreen>
   }
 }
 
-class _RecommendationTile extends StatelessWidget {
+class _ModernRecommendationTile extends StatelessWidget {
   final bool locked;
   final String label;
-  const _RecommendationTile({required this.locked, required this.label});
+  final Color color;
+  const _ModernRecommendationTile({
+    required this.locked,
+    required this.label,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 220,
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18)),
+      width: 240,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Stack(
         children: [
           Positioned.fill(
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(20),
               child: Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [Color(0xFFFFCF53), Color(0xFFFF9D4D)],
+                    colors: [
+                      color,
+                      color.withOpacity(0.8),
+                    ],
                   ),
                 ),
               ),
@@ -959,21 +1456,90 @@ class _RecommendationTile extends StatelessWidget {
           if (locked)
             Positioned.fill(
               child: Container(
-                decoration: BoxDecoration(color: Colors.black.withOpacity(0.35), borderRadius: BorderRadius.circular(18)),
-                child: const Center(child: Icon(Icons.lock, color: Colors.white, size: 40)),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.4),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.lock,
+                    color: Colors.white,
+                    size: 40,
+                  ),
+                ),
               ),
             ),
           Positioned(
-            left: 12,
-            bottom: 10,
+            left: 16,
+            bottom: 16,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
-              child: Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Text(
+                label,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12,
+                ),
+              ),
             ),
           ),
         ],
       ),
     );
   }
+}
+
+// Pintor personalizado para el patrón moderno del AppBar
+class ModernPatternPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withOpacity(0.1)
+      ..style = PaintingStyle.fill;
+
+    // Dibujar patrones geométricos modernos
+    for (int i = 0; i < 8; i++) {
+      final x = (i * 80.0) % size.width;
+      final y = (i * 60.0) % size.height;
+      final radius = 3.0 + (i % 3) * 2.0;
+      
+      canvas.drawCircle(
+        Offset(x, y),
+        radius,
+        paint,
+      );
+    }
+
+    // Líneas decorativas
+    final linePaint = Paint()
+      ..color = Colors.white.withOpacity(0.08)
+      ..strokeWidth = 1.0
+      ..style = PaintingStyle.stroke;
+
+    for (int i = 0; i < 5; i++) {
+      final startX = (i * 100.0) % size.width;
+      final endX = startX + 50;
+      final y = (i * 40.0) % size.height;
+      
+      canvas.drawLine(
+        Offset(startX, y),
+        Offset(endX, y),
+        linePaint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
