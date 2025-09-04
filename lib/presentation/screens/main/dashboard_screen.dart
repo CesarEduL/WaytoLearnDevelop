@@ -7,6 +7,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/orientation_aware_widget.dart';
 import '../profile/profile_screen.dart';
 import '../profile/progress_reports_screen.dart';
+import '../parents/parents_area_screen.dart';
 import '../splash_screen.dart';
 import '../exercises/exercise_selection_screen.dart';
 
@@ -103,13 +104,21 @@ class _DashboardScreenState extends State<DashboardScreen>
         body: SafeArea(
           child: Consumer<UserService>(
             builder: (context, userService, child) {
-              final user = userService.currentUser;
-              
-              if (user == null) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
+              // Usar usuario por defecto si no hay autenticación
+              final user = userService.currentUser ?? UserModel(
+                id: 'default',
+                name: 'Estudiante',
+                email: 'estudiante@waytolearn.com',
+                age: 8,
+                grade: '3er Grado',
+                avatar: 'default_avatar',
+                currentLevel: 1,
+                experiencePoints: 150,
+                totalPoints: 150,
+                achievements: ['Primer logro', 'Explorador'],
+                createdAt: DateTime.now(),
+                lastLoginAt: DateTime.now(),
+              );
 
               return CustomScrollView(
                 slivers: [
@@ -905,7 +914,14 @@ class _DashboardScreenState extends State<DashboardScreen>
             ListTile(
               leading: const Icon(Icons.settings),
               title: const Text('Área de padres'),
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const ParentsAreaScreen(),
+                  ),
+                );
+              },
             ),
           ],
         ),

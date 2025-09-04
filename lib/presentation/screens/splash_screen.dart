@@ -108,20 +108,13 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   void _navigateToNextScreen() async {
-    final userService = Provider.of<UserService>(context, listen: false);
-    
     // Cambiar a orientación horizontal antes de navegar
     await OrientationService().setLandscapeOnly();
     
-    if (userService.isAuthenticated) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const DashboardScreen()),
-      );
-    } else {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-      );
-    }
+    // Navegar directamente al dashboard sin verificar autenticación
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const DashboardScreen()),
+    );
   }
 
   @override

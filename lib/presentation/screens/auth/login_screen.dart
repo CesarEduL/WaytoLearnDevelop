@@ -544,10 +544,10 @@ class _LoginScreenState extends State<LoginScreen>
       final success = await userService.signInWithGoogle();
       
       if (success && mounted) {
-        // Asegurar orientación horizontal antes de ir al dashboard
+        // Asegurar orientación horizontal antes de regresar
         await OrientationService().setLandscapeOnly();
-        // Ir al dashboard tras iniciar sesión correctamente
-        Navigator.of(context).popUntil((route) => route.isFirst);
+        // Regresar al área de padres tras iniciar sesión correctamente
+        Navigator.of(context).pop();
       } else if (mounted) {
         // Mostrar error si no fue exitoso
         _showErrorSnackBar(scaffoldMessenger, userService.errorMessage ?? 'Error al iniciar sesión');
