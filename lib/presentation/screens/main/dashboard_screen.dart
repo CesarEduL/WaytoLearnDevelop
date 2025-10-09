@@ -224,26 +224,21 @@ class _DashboardScreenState extends State<DashboardScreen>
       pinned: true,
       backgroundColor: Colors.transparent,
       elevation: 0,
-      leading: Container(
+    leading: Builder(
+      builder: (ctx) => Container(
         margin: const EdgeInsets.only(left: 8),
         decoration: BoxDecoration(
-          color: AppTheme.primaryColor.withOpacity(0.9), // Color del botón sidebar
+          color: AppTheme.primaryColor.withOpacity(0.9),
           borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8, offset: Offset(0, 2))],
         ),
         child: IconButton(
           icon: const Icon(Icons.menu, color: Colors.white),
-          onPressed: () {
-            Scaffold.of(context).openDrawer();
-          },
+          onPressed: () => Scaffold.of(ctx).openDrawer(),
         ),
       ),
+    ),
+
       flexibleSpace: FlexibleSpaceBar(
                  background: Container(
            decoration: BoxDecoration(
@@ -693,7 +688,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 160,
+        height: 180,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
