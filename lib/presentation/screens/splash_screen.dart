@@ -61,13 +61,9 @@ class _SplashScreenState extends State<SplashScreen>
     ));
 
     // Animación del texto (fade in con slide)
-    _textAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _textController,
-      curve: Curves.easeOutBack,
-    ));
+    _textAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _textController, curve: Curves.easeOutCubic),
+    );
 
     // Animación de color del fondo
     _colorAnimation = ColorTween(
