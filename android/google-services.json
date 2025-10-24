@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "32146242382",
+    "firebase_url": "https://waytolearn-3ebca-default-rtdb.firebaseio.com",
+    "project_id": "waytolearn-3ebca",
+    "storage_bucket": "waytolearn-3ebca.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:32146242382:android:6483eb23ea59ac909efc1f",
+        "android_client_info": {
+          "package_name": "com.example.waytolearn"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "32146242382-khmudi9frd72adb8k296kh7nfa7itfrh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.waytolearn",
+            "certificate_hash": "6033f36d196abbdfb78e16e5a51c64275cbc9a8d"
+          }
+        },
+        {
+          "client_id": "32146242382-8jgpmppa92qa8jf83q0v0lphimbr8p68.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBiCL99Yih3xeCDRkIhICLs4RbixP8AmQ4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "32146242382-1p7pvuga7438ht7soe858uj0h9nf0p31.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "32146242382-j7mimn1p4c95jacl1o50jjchif2276o2.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.waytolearn"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

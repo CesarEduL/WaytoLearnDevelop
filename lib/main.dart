@@ -12,6 +12,11 @@ import 'core/providers/math_exercise_provider.dart';
 import 'presentation/screens/splash_screen.dart';
 import 'core/theme/app_theme.dart';
 
+import 'presentation/screens/communication/progress_map_screen.dart';
+import 'presentation/screens/communication/session_progress_screen.dart';
+import 'presentation/screens/communication/bear_progress_map_screen.dart';
+
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -39,7 +44,9 @@ class WaytoLearnApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => StoryService()),
         ChangeNotifierProvider(create: (_) => StoryExerciseProvider()),
         ChangeNotifierProvider(create: (_) => MathExerciseProvider()),
+
       ],
+      
       child: MaterialApp(
         title: 'WaytoLearn',
         debugShowCheckedModeBanner: false,
