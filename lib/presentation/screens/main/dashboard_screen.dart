@@ -10,6 +10,7 @@ import '../profile/progress_reports_screen.dart';
 import '../parents/parents_area_screen.dart';
 import '../splash_screen.dart';
 import '../exercises/exercise_selection_screen.dart';
+import '../communication/progress_map_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -1311,12 +1312,21 @@ class _DashboardScreenState extends State<DashboardScreen>
   }
 
   void _navigateToSubject(BuildContext context, String subject) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ExerciseSelectionScreen(subject: subject),
-      ),
-    );
+    if (subject == 'communication') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const ProgressMapScreen(),
+        ),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ExerciseSelectionScreen(subject: subject),
+        ),
+      );
+    }
   }
 
   void _showLogoutDialog(BuildContext context) {
