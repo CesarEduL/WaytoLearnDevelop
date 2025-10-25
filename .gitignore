@@ -50,7 +50,9 @@ android/key.properties
 
 # Android Firebase specific
 android/app/google-services.json
+google-services.json
 ios/Runner/GoogleService-Info.plist
+GoogleService-Info.plist
 
 # Environment variables
 .env
