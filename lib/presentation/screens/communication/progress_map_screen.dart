@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'session_progress_screen.dart';
 
+
+
 class ProgressMapScreen extends StatefulWidget {
   const ProgressMapScreen({super.key});
 
@@ -13,12 +15,30 @@ class _ProgressMapScreenState extends State<ProgressMapScreen> {
   String? _bearImageUrl;
   bool _isLoading = true;
 
-  @override
-  void initState() {
-    super.initState();
-    _loadImages();
-  }
+@override
+void initState() {
+  super.initState();
+ 
+  print('ProgressMapScreen: initState llamado');
 
+  
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+      print('ProgressMapScreen: _isLoading = false');
+    }
+  });
+
+  // TODO: Descomentar cuando tengas Firebase configurado
+  _loadImages();
+}
+
+
+  // TODO: Descomentar cuando tengas Firebase Storage configurado
   Future<void> _loadImages() async {
     try {
       // Cargar imagen del oso desde Firebase Storage
@@ -39,6 +59,7 @@ class _ProgressMapScreenState extends State<ProgressMapScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     if (_isLoading) {
       return const Scaffold(
         backgroundColor: Colors.white,
@@ -54,10 +75,19 @@ class _ProgressMapScreenState extends State<ProgressMapScreen> {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // Camino curvo punteado
           Positioned.fill(
-            child: CustomPaint(
-              painter: _DottedPathPainter(),
+          child: CustomPaint(
+          painter: _DottedPathPainter(),
+          ),
+          ),
+
+          // Contenido de prueba
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+               
+              ],
             ),
           ),
 

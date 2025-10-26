@@ -1311,14 +1311,21 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
   }
 
-  void _navigateToSubject(BuildContext context, String subject) {
+  void _navigateToSubject(BuildContext context, String subject) async {
     if (subject == 'communication') {
-      Navigator.push(
+      await OrientationService().setLandscapeOnly();
+      
+      if (!context.mounted) return;
+      
+      await Navigator.push(
         context,
         MaterialPageRoute(
           builder: (_) => const ProgressMapScreen(),
         ),
       );
+      
+      
+      
     } else {
       Navigator.push(
         context,

@@ -12,9 +12,12 @@ import 'core/providers/math_exercise_provider.dart';
 import 'presentation/screens/splash_screen.dart';
 import 'core/theme/app_theme.dart';
 
-import 'presentation/screens/communication/progress_map_screen.dart';
+
+
+
+
 import 'presentation/screens/communication/session_progress_screen.dart';
-import 'presentation/screens/communication/bear_progress_map_screen.dart';
+
 
 
 void main() async {
@@ -27,7 +30,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
+  
   runApp(const WaytoLearnApp());
 }
 

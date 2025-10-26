@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-
+//fov
 class SessionProgressScreen extends StatefulWidget {
   final int sessionNumber;
   
@@ -20,12 +20,28 @@ class _SessionProgressScreenState extends State<SessionProgressScreen> {
   @override
   void initState() {
     super.initState();
-    _loadImages();
+    print('SessionProgressScreen: initState llamado');
+    
+    // USAR WidgetsBinding para actualizar el estado DESPUÉS del primer frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        print('SessionProgressScreen: _isLoading = false');
+      }
+    });
+    
+    // TODO: Descomentar cuando tengas las URLs de Firebase
+    // _loadImages();
   }
 
+  // TODO: Descomentar cuando tengas Firebase Storage configurado
+  // RUTA DE FIREBASE: images/bear_character.png
   Future<void> _loadImages() async {
     try {
       // Cargar imagen del oso desde Firebase Storage
+      // REEMPLAZAR CON TU RUTA: images/bear_character.png
       final bearRef = FirebaseStorage.instance.ref().child('images/bear_character.png');
       final bearUrl = await bearRef.getDownloadURL();
       
