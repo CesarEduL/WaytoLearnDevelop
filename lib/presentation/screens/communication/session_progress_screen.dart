@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'progress_map_screen.dart';
 //fov
 class SessionProgressScreen extends StatefulWidget {
-  final int sessionNumber;
-  
   const SessionProgressScreen({
     super.key, 
-    required this.sessionNumber,
   });
 
   @override
@@ -153,17 +151,17 @@ class _SessionProgressScreenState extends State<SessionProgressScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "Sesión ${widget.sessionNumber}",
-                      style: const TextStyle(
-                        color: Colors.green,
+                    const Text(
+                      "Progreso de Sesiones",
+                      style: TextStyle(
+                        color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 24,
                       ),
                     ),
                     const SizedBox(height: 2),
-                    Text(
-                      _getSessionTitle(widget.sessionNumber),
+                    const Text(
+                      "Selecciona una sesión para continuar",
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 14,
@@ -254,6 +252,7 @@ class _SessionProgressScreenState extends State<SessionProgressScreen> {
           progress: 1.0,
           color: Colors.purple,
           isCompleted: true,
+          onTap: () => _onSessionTap(1),
         ),
         _SessionCard(
           title: "Sesión 2",
@@ -261,6 +260,7 @@ class _SessionProgressScreenState extends State<SessionProgressScreen> {
           progress: 0.45,
           color: Colors.green,
           isCompleted: false,
+          onTap: () => _onSessionTap(2),
         ),
         _SessionCard(
           title: "Sesión 3",
@@ -268,6 +268,7 @@ class _SessionProgressScreenState extends State<SessionProgressScreen> {
           progress: 0.0,
           color: Colors.cyan,
           isCompleted: false,
+          onTap: () => _onSessionTap(3),
         ),
         _SessionCard(
           title: "Sesión 4",
@@ -275,6 +276,7 @@ class _SessionProgressScreenState extends State<SessionProgressScreen> {
           progress: 0.0,
           color: Colors.lightBlueAccent,
           isCompleted: false,
+          onTap: () => _onSessionTap(4),
         ),
         _SessionCard(
           title: "Sesión 5",
@@ -282,6 +284,7 @@ class _SessionProgressScreenState extends State<SessionProgressScreen> {
           progress: 0.0,
           color: Colors.orange,
           isCompleted: false,
+          onTap: () => _onSessionTap(5),
         ),
         _SessionCard(
           title: "Sesión 6",
@@ -289,6 +292,7 @@ class _SessionProgressScreenState extends State<SessionProgressScreen> {
           progress: 0.0,
           color: Colors.teal,
           isCompleted: false,
+          onTap: () => _onSessionTap(6),
         ),
       ],
     );
@@ -489,6 +493,15 @@ class _SessionProgressScreenState extends State<SessionProgressScreen> {
       ),
     );
   }
+
+  void _onSessionTap(int sessionNumber) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ProgressMapScreen(sessionNumber: sessionNumber),
+      ),
+    );
+  }
 }
 
 class _SessionCard extends StatelessWidget {
@@ -497,6 +510,7 @@ class _SessionCard extends StatelessWidget {
   final double progress;
   final Color color;
   final bool isCompleted;
+  final VoidCallback onTap;
 
   const _SessionCard({
     required this.title,
@@ -504,12 +518,13 @@ class _SessionCard extends StatelessWidget {
     required this.progress,
     required this.color,
     required this.isCompleted,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => _onCardTap(),
+      onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
           color: color,
@@ -601,10 +616,5 @@ class _SessionCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  void _onCardTap() {
-    // TODO: Navegar a la sesión específica
-    print('Tapped on $title');
   }
 }
