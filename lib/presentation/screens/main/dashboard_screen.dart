@@ -10,6 +10,7 @@ import '../profile/progress_reports_screen.dart';
 import '../parents/parents_area_screen.dart';
 import '../splash_screen.dart';
 import '../exercises/exercise_selection_screen.dart';
+import '../communication/session_progress_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -1310,13 +1311,29 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
   }
 
-  void _navigateToSubject(BuildContext context, String subject) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ExerciseSelectionScreen(subject: subject),
-      ),
-    );
+  void _navigateToSubject(BuildContext context, String subject) async {
+    if (subject == 'communication') {
+      await OrientationService().setLandscapeOnly();
+      
+      if (!context.mounted) return;
+      
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const SessionProgressScreen(),
+        ),
+      );
+      
+      
+      
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ExerciseSelectionScreen(subject: subject),
+        ),
+      );
+    }
   }
 
   void _showLogoutDialog(BuildContext context) {
