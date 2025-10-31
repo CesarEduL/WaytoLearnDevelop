@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'story_detail_screen.dart';
 
 class ProgressMapScreen extends StatefulWidget {
   final int sessionNumber;
@@ -101,9 +102,16 @@ class _ProgressMapScreenState extends State<ProgressMapScreen> {
 
   // 🔹 Acciones
   void _onBookTap(int bookNumber) {
-    // TODO: Implementar navegación a la pantalla del cuento/actividad específica
-    print('Tapped on book $bookNumber in session ${widget.sessionNumber}');
-  }
+  final storyId = "C0$bookNumber"; // 1 → C01, 2 → C02, etc.
+
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => StoryDetailScreen(storyId: storyId),
+    ),
+  );
+}
+
 
   void _onBearTap() {
     ScaffoldMessenger.of(context).showSnackBar(

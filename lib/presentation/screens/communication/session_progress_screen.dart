@@ -500,7 +500,9 @@ class _SessionProgressScreenState extends State<SessionProgressScreen> {
       MaterialPageRoute(
         builder: (_) => ProgressMapScreen(sessionNumber: sessionNumber),
       ),
+      
     );
+    print('Sesión $sessionNumber tocada');
   }
 }
 
