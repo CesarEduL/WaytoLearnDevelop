@@ -14,20 +14,24 @@ class _StoryDetailScreenState extends State<StoryDetailScreen> {
   String? _title;
   String? _content;
   String? _imageUrl;
+  Map<String, dynamic>? _options;
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadStory();
+    _loadStory(widget.storyId);
   }
 
-  Future<void> _loadStory() async {
+  Future<void> _loadStory(String storyId) async {
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
-      // 🔹 Lee el documento desde la colección "cuentos"
       final doc = await FirebaseFirestore.instance
           .collection('Cuentos')
-          .doc(widget.storyId)
+          .doc(storyId)
           .get();
 
       if (doc.exists) {
@@ -36,12 +40,15 @@ class _StoryDetailScreenState extends State<StoryDetailScreen> {
           _title = data['titulo_cuento'];
           _content = data['contenido'];
           _imageUrl = data['imagen'];
+          _options = data['opciones'] != null ? Map<String, dynamic>.from(data['opciones']) : null;
           _isLoading = false;
         });
       } else {
         setState(() {
           _title = "Cuento no encontrado";
           _content = "No hay información disponible.";
+          _imageUrl = null;
+          _options = null;
           _isLoading = false;
         });
       }
@@ -53,6 +60,11 @@ class _StoryDetailScreenState extends State<StoryDetailScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  void _goToOption(String subcuentoId) {
+    // 🔹 Carga el siguiente subcuento
+    _loadStory(subcuentoId);
   }
 
   @override
@@ -79,6 +91,43 @@ class _StoryDetailScreenState extends State<StoryDetailScreen> {
                     _content ?? "",
                     style: const TextStyle(fontSize: 18, height: 1.5),
                   ),
+                  const SizedBox(height: 24),
+                  if (_options != null) ...[
+                    const Text(
+                      "Elige una opción:",
+                      style: TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 12),
+                    for (var optionKey in _options!.keys)
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.purple.shade400,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        onPressed: () {
+                          final nextId =
+                              _options![optionKey]['subcuento_id'] ?? "";
+                          if (nextId.isNotEmpty) {
+                            _goToOption(nextId);
+                          }
+                        },
+                        child: Text(
+                          _options![optionKey]['texto'] ?? "Continuar",
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ),
+                  ] else
+                    const Center(
+                      child: Text(
+                        "Fin del cuento 🎉",
+                        style: TextStyle(
+                            fontSize: 22, fontWeight: FontWeight.bold),
+                      ),
+                    ),
                 ],
               ),
             ),
