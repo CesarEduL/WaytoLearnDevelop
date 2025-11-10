@@ -1,3 +1,6 @@
+import 'dart:ffi';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -10,6 +13,7 @@ import 'core/providers/user_provider.dart';
 import 'core/providers/story_exercise_provider.dart';
 import 'core/providers/math_exercise_provider.dart';
 import 'presentation/screens/splash_screen.dart';
+import 'providers/padres_page_provider.dart';
 import 'core/theme/app_theme.dart';
 
 void main() async {
@@ -38,6 +42,7 @@ class WaytoLearnApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => GameProvider()),
         ChangeNotifierProvider(create: (_) => StoryService()),
         ChangeNotifierProvider(create: (_) => StoryExerciseProvider()),
+        ChangeNotifierProvider(create: (_) => PadresPageProvider()),
         ChangeNotifierProvider(create: (_) => MathExerciseProvider()),
       ],
       child: MaterialApp(
