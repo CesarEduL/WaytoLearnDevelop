@@ -70,40 +70,38 @@ class _SessionProgressScreenState extends State<SessionProgressScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          // Contenido principal con scroll
-          SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-            child: Column(
-              children: [
-                const SizedBox(height: 60), // Espacio para el oso
-                
-                // Banner principal púrpura
-                _buildMainBanner(),
-                
-                const SizedBox(height: 20),
-                
-                // Grid de sesiones
-                _buildSessionGrid(),
-                
-                const SizedBox(height: 100), // Espacio para el botón flotante
-              ],
+      body: SafeArea(
+        child: Stack(
+          children: [
+            // Contenido principal con scroll
+            SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 100, 100, 100),
+              child: Column(
+                children: [
+                  // Banner principal púrpura
+                  _buildMainBanner(),
+                  
+                  const SizedBox(height: 20),
+                  
+                  // Grid de sesiones
+                  _buildSessionGrid(),
+                ],
+              ),
             ),
-          ),
 
-          // Oso en la parte superior
-          _buildBearCharacter(),
+            // Oso en la parte superior
+            _buildBearCharacter(),
 
-          // Botón Home (arriba izquierda)
-          _buildHomeButton(),
+            // Botón Home (arriba izquierda)
+            _buildHomeButton(),
 
-          // Botón Configuración (arriba derecha)
-          _buildSettingsButton(),
+            // Botón Configuración (arriba derecha)
+            _buildSettingsButton(),
 
-          // Botón Libro (abajo derecha)
-          _buildBookButton(),
-        ],
+            // Botón Libro (abajo derecha)
+            _buildBookButton(),
+          ],
+        ),
       ),
     );
   }
