@@ -12,14 +12,6 @@ import 'core/providers/math_exercise_provider.dart';
 import 'presentation/screens/splash_screen.dart';
 import 'core/theme/app_theme.dart';
 
-
-
-
-
-
-
-
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
