@@ -5,8 +5,9 @@ import '../../../core/widgets/orientation_aware_widget.dart';
 import '../profile/profile_screen.dart';
 import '../profile/progress_reports_screen.dart';
 import '../parents/parents_area_screen.dart';
-import '../exercises/exercise_selection_screen.dart';
 import '../communication/session_progress_screen.dart';
+import '../mathematics/math_index_screen_sessions.dart';
+
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -488,7 +489,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _navigateToSubject(BuildContext context, String subject) async {
+    print('🔍 _navigateToSubject llamado con: $subject');
+    
     if (subject == 'communication') {
+      print('✅ Entrando a Comunicación');
       await OrientationService().setLandscapeOnly();
       
       if (!context.mounted) return;
@@ -503,10 +507,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
       
       
     } else {
+      // Matemáticas
+      print('✅ Entrando a Matemáticas');
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => ExerciseSelectionScreen(subject: subject),
+          builder: (_) => const MathIndexScreenSessions(),
         ),
       );
     }
@@ -554,4 +560,3 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 }
-
