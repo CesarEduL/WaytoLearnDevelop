@@ -46,10 +46,6 @@ class ProgressBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final rewardIconFuture = Future.value(
-      subjectProgress >= 1.0 ? rewardCompletedIconUrl! : rewardPendingIconUrl!,
-    );
-
     return SizedBox(
       width: 872 * scale,
       height: 121 * scale,
@@ -170,22 +166,10 @@ class ProgressBanner extends StatelessWidget {
                 child: SizedBox(
                   width: (subjectProgress >= 1.0 ? 36 : 47) * scale,
                   height: (subjectProgress >= 1.0 ? 33 : 52) * scale,
-                  child: FutureBuilder<String>(
-                    future: rewardIconFuture,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
-                        return SvgPicture.network(
-                          snapshot.data!,
-                          fit: BoxFit.contain,
-                          placeholderBuilder: (context) => const SizedBox.shrink(),
-                        );
-                      }
-                      return Icon(
-                        subjectProgress >= 1.0 ? Icons.card_giftcard : Icons.card_giftcard_outlined,
-                        size: (subjectProgress >= 1.0 ? 33 : 47) * scale,
-                        color: const Color(0xFF8A5CF6),
-                      );
-                    },
+                  child: SvgPicture.network(
+                    subjectProgress >= 1.0 ? rewardCompletedIconUrl! : rewardPendingIconUrl!,
+                    fit: BoxFit.contain,
+                    placeholderBuilder: (context) => const SizedBox.shrink(),
                   ),
                 ),
               ),

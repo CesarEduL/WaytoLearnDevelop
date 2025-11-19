@@ -15,8 +15,6 @@ class CommunicationSwitchButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final communicationIconFuture = Future.value(iconUrl!);
-
     return SizedBox(
       width: 83.33 * scale,
       height: 40 * scale,
@@ -51,36 +49,24 @@ class CommunicationSwitchButton extends StatelessWidget {
               child: SizedBox(
                 width: 36 * scale,
                 height: 33 * scale,
-                child: FutureBuilder<String>(
-                  future: communicationIconFuture,
-                  builder: (context, snapshot) {
-                    final isReady = snapshot.connectionState == ConnectionState.done && snapshot.hasData;
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF9C74F2),
-                        borderRadius: BorderRadius.circular(20 * scale),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0x66000000),
-                            offset: Offset(0, 4 * scale),
-                            blurRadius: 6 * scale,
-                          ),
-                        ],
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF9C74F2),
+                    borderRadius: BorderRadius.circular(20 * scale),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0x66000000),
+                        offset: Offset(0, 4 * scale),
+                        blurRadius: 6 * scale,
                       ),
-                      alignment: Alignment.center,
-                      child: isReady
-                          ? SvgPicture.network(
-                              snapshot.data!,
-                              fit: BoxFit.contain,
-                              placeholderBuilder: (context) => const SizedBox.shrink(),
-                            )
-                          : Icon(
-                              Icons.chat_bubble,
-                              size: 18 * scale,
-                              color: Colors.white,
-                            ),
-                    );
-                  },
+                    ],
+                  ),
+                  alignment: Alignment.center,
+                  child: SvgPicture.network(
+                    iconUrl!,
+                    fit: BoxFit.contain,
+                    placeholderBuilder: (context) => const SizedBox.shrink(),
+                  ),
                 ),
               ),
             ),

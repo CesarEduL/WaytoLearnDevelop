@@ -17,13 +17,6 @@ class HomeIconButton extends StatefulWidget {
 
 class _HomeIconButtonState extends State<HomeIconButton> {
   bool _isPressed = false;
-  late final Future<String> _iconFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _iconFuture = Future.value(widget.iconUrl!);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,64 +30,37 @@ class _HomeIconButtonState extends State<HomeIconButton> {
       child: SizedBox(
         width: 100.21,
         height: 111.16,
-        child: FutureBuilder<String>(
-          future: _iconFuture,
-          builder: (context, snapshot) {
-            final isIconReady =
-                snapshot.connectionState == ConnectionState.done && snapshot.hasData;
-            return Stack(
-              clipBehavior: Clip.none,
-              children: [
-                // Círculo de fondo
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF8397BE),
-                      borderRadius: BorderRadius.circular(60),
-                    ),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // Círculo de fondo
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF8397BE),
+                  borderRadius: BorderRadius.circular(60),
+                ),
+              ),
+            ),
+            Positioned(
+              left: 40,
+              top: 57,
+              child: AnimatedScale(
+                scale: _isPressed ? 2.0 : 1.0,
+                duration: const Duration(milliseconds: 350),
+                curve: Curves.easeOutBack,
+                child: SizedBox(
+                  width: 29,
+                  height: 26,
+                  child: SvgPicture.network(
+                    widget.iconUrl!,
+                    fit: BoxFit.contain,
+                    placeholderBuilder: (context) => const SizedBox.shrink(),
                   ),
                 ),
-                if (isIconReady)
-                  Positioned(
-                    left: 40,
-                    top: 57,
-                    child: AnimatedScale(
-                      scale: _isPressed ? 2.0 : 1.0,
-                      duration: const Duration(milliseconds: 350),
-                      curve: Curves.easeOutBack,
-                      child: SizedBox(
-                        width: 29,
-                        height: 26,
-                        child: SvgPicture.network(
-                          snapshot.data!,
-                          fit: BoxFit.contain,
-                          placeholderBuilder: (context) => const SizedBox.shrink(),
-                        ),
-                      ),
-                    ),
-                  ),
-                if (!isIconReady)
-                  Positioned(
-                    left: 35,
-                    top: 43,
-                    child: AnimatedScale(
-                      scale: _isPressed ? 1.3 : 1.0,
-                      duration: const Duration(milliseconds: 150),
-                      curve: Curves.easeOutBack,
-                      child: const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: Icon(
-                          Icons.home,
-                          size: 20,
-                          color: Color(0xFFEC4899),
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            );
-          },
+              ),
+            ),
+          ],
         ),
       ),
     );
