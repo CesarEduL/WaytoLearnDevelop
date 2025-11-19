@@ -5,6 +5,10 @@ import 'package:waytolearn/presentation/screens/communication/session_progress_s
 import 'package:waytolearn/presentation/widgets/mathematics/home_icon_button.dart';
 import 'package:waytolearn/presentation/widgets/mathematics/communication_switch_button.dart';
 import 'package:waytolearn/presentation/widgets/mathematics/mathematics_bottom_bot.dart';
+import 'package:waytolearn/presentation/widgets/mathematics/story_path_widget.dart';
+import 'package:waytolearn/presentation/screens/mathematics/math_index_screen_sessions.dart';
+import 'package:waytolearn/presentation/screens/main/dashboard_screen.dart';
+
 
 class BearProgressMapScreen extends StatefulWidget {
   const BearProgressMapScreen({super.key});
@@ -14,8 +18,6 @@ class BearProgressMapScreen extends StatefulWidget {
 }
 
 class _BearProgressMapScreenState extends State<BearProgressMapScreen> {
-
-
   @override
   void initState() {
     super.initState();
@@ -40,12 +42,24 @@ class _BearProgressMapScreenState extends State<BearProgressMapScreen> {
         fit: StackFit.expand,
         clipBehavior: Clip.none,
         children: [
-
+          // Camino de cuentos - contenido principal centrado
+          Positioned(
+              top: 10 * scale,
+              left: -20 * scale,
+              child: StoryPathWidget(
+                completedStoryIndex: -1, // Ejemplo: 3 cuentos completados
+                scale: scale,
+                onStoryTap: (index) {
+                  debugPrint('Tapped story: ${index + 1}');
+                  // TODO: Navegar a la pantalla del cuento
+                },
+              ),
+            ),
           Positioned(
               top: -32,
               left: -17,
               child: HomeIconButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: _goToDashboard,
               ),
             ),
             Positioned(
@@ -63,9 +77,9 @@ class _BearProgressMapScreenState extends State<BearProgressMapScreen> {
               left: 830 * scale,
               child: MathematicsBottomBot(
                 scale: scale,
+                onTap: _refreshScreen,
               ),
             ),
-
           ],
         ),
     );
@@ -78,6 +92,28 @@ class _BearProgressMapScreenState extends State<BearProgressMapScreen> {
       context,
       MaterialPageRoute(
         builder: (_) => const SessionProgressScreen(),
+      ),
+    );
+  }
+
+  void _refreshScreen() {
+    // Recargar la pantalla completamente reemplazándola con una nueva instancia
+    Navigator.pushReplacement(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => const MathIndexScreenSessions(),
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
+      ),
+    );
+  }
+
+  Future<void> _goToDashboard() async {
+    if (!mounted) return;
+    await Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const DashboardScreen(),
       ),
     );
   }
