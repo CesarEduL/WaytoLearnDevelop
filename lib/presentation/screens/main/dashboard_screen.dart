@@ -5,7 +5,7 @@ import '../../../core/widgets/orientation_aware_widget.dart';
 import '../profile/profile_screen.dart';
 import '../profile/progress_reports_screen.dart';
 import '../parents/parents_area_screen.dart';
-import '../communication/session_progress_screen.dart';
+import '../communication/comm_index_screen_sessions.dart';
 import '../mathematics/math_index_screen_sessions.dart';
 
 
@@ -500,7 +500,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => const SessionProgressScreen(),
+          builder: (_) => const CommIndexScreenSessions(),
         ),
       );
       

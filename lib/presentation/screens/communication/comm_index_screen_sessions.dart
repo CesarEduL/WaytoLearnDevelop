@@ -1,47 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:waytolearn/core/services/orientation_service.dart';
-import 'package:waytolearn/presentation/screens/communication/comm_index_screen_sessions.dart';
-import 'package:waytolearn/presentation/screens/communication/session_progress_screen.dart';
-import 'package:waytolearn/presentation/screens/mathematics/bear_progress_map_screen.dart';
+import 'package:waytolearn/presentation/screens/communication/bear_progress_map_screen.dart';
+import 'package:waytolearn/presentation/screens/mathematics/math_index_screen_sessions.dart';
 import 'package:waytolearn/presentation/screens/main/dashboard_screen.dart';
-import 'package:waytolearn/presentation/widgets/mathematics/home_icon_button.dart';
-import 'package:waytolearn/presentation/widgets/mathematics/communication_switch_button.dart';
-import 'package:waytolearn/presentation/widgets/mathematics/progress_banner.dart';
-import 'package:waytolearn/presentation/widgets/mathematics/empty_box_widget.dart';
-import 'package:waytolearn/presentation/widgets/mathematics/mathematics_bottom_bot.dart';
+import 'package:waytolearn/presentation/widgets/communication/home_icon_button.dart';
+import 'package:waytolearn/presentation/widgets/communication/mathematics_switch_button.dart';
+import 'package:waytolearn/presentation/widgets/communication/progress_banner.dart';
+import 'package:waytolearn/presentation/widgets/communication/session_box_widget.dart';
+import 'package:waytolearn/presentation/widgets/communication/communication_bottom_bot.dart';
 
-class MathIndexScreenSessions extends StatefulWidget {
-  const MathIndexScreenSessions({super.key});
+class CommIndexScreenSessions extends StatefulWidget {
+  const CommIndexScreenSessions({super.key});
 
   @override
-  State<MathIndexScreenSessions> createState() => _MathIndexScreenSessionsState();
+  State<CommIndexScreenSessions> createState() => _CommIndexScreenSessionsState();
 }
 
-class _MathIndexScreenSessionsState extends State<MathIndexScreenSessions> {
+class _CommIndexScreenSessionsState extends State<CommIndexScreenSessions> {
   String _currentSession = 'Sesión 1'; // Variable para mostrar la sesión actual
   String _sessionName = 'Nombre de la Sesión'; // Variable para mostrar el nombre de la sesión
   double _subjectProgress = 0.5; // Variable para el progreso de la materia (0.0 a 1.0)
-  String _subjectName = 'Matemática'; // Variable para el nombre de la materia
+  String _subjectName = 'Comunicación'; // Variable para el nombre de la materia
   
-  // Variables para EmptyBoxWidget (Sesión 1)
+  // Variables para SessionBoxWidget (Sesión 1)
   String _session1Number = 'Sesión 1';
-  String _session1Theme = 'Tema de la sesión';
+  String _session1Theme = 'Letras y sonidos';
   double _session1Progress = 1; // 0.0 a 1.0
   
   // Variables para Sesión 2
   String _session2Number = 'Sesión 2';
-  String _session2Theme = 'Operaciones básicas';
+  String _session2Theme = 'Palabras y frases';
   double _session2Progress = 0.45; // 45%
   
   // Variables para Sesión 3
   String _session3Number = 'Sesión 3';
-  String _session3Theme = 'Formas y figuras';
+  String _session3Theme = 'Cuentos y narraciones';
   double _session3Progress = 0.0; // 0%
   
   // Variables para Sesión 4
   String _session4Number = 'Sesión 4';
-  String _session4Theme = 'Medidas y comparaciones';
+  String _session4Theme = 'Expresión oral';
   double _session4Progress = 0.0; // 0%
 
   // GlobalKeys para detectar posición de cada widget
@@ -99,8 +98,8 @@ class _MathIndexScreenSessionsState extends State<MathIndexScreenSessions> {
             Positioned(
               top: 14 * scale,
               left: 806 * scale,
-              child: CommunicationSwitchButton(
-                onTap: _openCommunication,
+              child: MathematicsSwitchButton(
+                onTap: _openMathematics,
                 scale: scale,
               ),
             ),
@@ -119,13 +118,19 @@ class _MathIndexScreenSessionsState extends State<MathIndexScreenSessions> {
             Positioned(
               top: 245 * scale,
               left: 17 * scale,
-              child: EmptyBoxWidget(
+              child: SessionBoxWidget(
                 key: _session1Key,
                 scale: scale,
                 sessionNumber: _session1Number,
                 sessionTheme: _session1Theme,
                 progress: _session1Progress,
                 isHovered: _session1Hovered,
+                backgroundColor: const Color(0xFF8A5CF6), // Amarillo naranja
+                sessionNumberColor: const Color(0xFF5CF6D7),
+                sessionThemeColor: const Color(0xFFC8F65C),
+                progressBarColor1: const Color(0xFFFF8C42),
+                progressBarColor2: const Color(0xFFFFB84D),
+                percentageColor: const Color(0xFFFFFFFF),
                 onTap: () => _openBearProgressMap(),
               ),
             ),
@@ -133,14 +138,14 @@ class _MathIndexScreenSessionsState extends State<MathIndexScreenSessions> {
             Positioned(
               top: 245 * scale,
               left: 237 * scale,
-              child: EmptyBoxWidget(
+              child: SessionBoxWidget(
                 key: _session2Key,
                 scale: scale,
                 sessionNumber: _session2Number,
                 sessionTheme: _session2Theme,
                 progress: _session2Progress,
                 isHovered: _session2Hovered,
-                backgroundColor: const Color(0xFF7BF65C),
+                backgroundColor: const Color(0xFF7BF65C), // Amarillo naranja
                 sessionNumberColor: const Color(0xFF583C95),
                 sessionThemeColor: const Color(0xFF34089B),
                 progressBarColor1: const Color(0xFF8A5CF6),
@@ -153,18 +158,18 @@ class _MathIndexScreenSessionsState extends State<MathIndexScreenSessions> {
             Positioned(
               top: 245 * scale,
               left: 457 * scale,
-              child: EmptyBoxWidget(
+              child: SessionBoxWidget(
                 key: _session3Key,
                 scale: scale,
                 sessionNumber: _session3Number,
                 sessionTheme: _session3Theme,
                 progress: _session3Progress,
                 isHovered: _session3Hovered,
-                backgroundColor: const Color(0xFF8A5CF6),
-                sessionNumberColor: const Color(0xFF5CF6D7),
-                sessionThemeColor: const Color(0xFF7BF65C),
-                progressBarColor1: const Color(0xFFFF8C42),
-                progressBarColor2: const Color(0xFFFFB84D),
+                backgroundColor: const Color(0xFF5CF6D7), // Naranja
+                sessionNumberColor: const Color(0xFF080118),
+                sessionThemeColor: const Color(0xFFF65CC8),
+                progressBarColor1: const Color(0xFF8A5CF6),
+                progressBarColor2: const Color(0xFF7595F7),
                 percentageColor: const Color(0xFFFFFFFF),
                 onTap: () => _openBearProgressMap(),
               ),
@@ -173,18 +178,18 @@ class _MathIndexScreenSessionsState extends State<MathIndexScreenSessions> {
             Positioned(
               top: 245 * scale,
               left: 677 * scale,
-              child: EmptyBoxWidget(
+              child: SessionBoxWidget(
                 key: _session4Key,
                 scale: scale,
                 sessionNumber: _session4Number,
                 sessionTheme: _session4Theme,
                 progress: _session4Progress,
                 isHovered: _session4Hovered,
-                backgroundColor: const Color(0xFF8A5CF6),
-                sessionNumberColor: const Color(0xFF5CF6D7),
-                sessionThemeColor: const Color(0xFF7BF65C),
-                progressBarColor1: const Color(0xFFFF8C42),
-                progressBarColor2: const Color(0xFFFFB84D),
+                backgroundColor: const Color(0xFF5CF6D7), // Naranja
+                sessionNumberColor: const Color(0xFF080118),
+                sessionThemeColor: const Color(0xFFF65CC8),
+                progressBarColor1: const Color(0xFF8A5CF6),
+                progressBarColor2: const Color(0xFF7595F7),
                 percentageColor: const Color(0xFFFFFFFF),
                 onTap: () => _openBearProgressMap(),
               ),
@@ -197,7 +202,7 @@ class _MathIndexScreenSessionsState extends State<MathIndexScreenSessions> {
           Positioned(
             top: 345 * (MediaQuery.of(context).size.width / 912.0),
             left: 830 * (MediaQuery.of(context).size.width / 912.0),
-            child: MathematicsBottomBot(
+            child: CommunicationBottomBot(
               scale: MediaQuery.of(context).size.width / 912.0,
               onTap: _refreshScreen,
             ),
@@ -248,7 +253,7 @@ class _MathIndexScreenSessionsState extends State<MathIndexScreenSessions> {
     Navigator.pushReplacement(
       context,
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => const MathIndexScreenSessions(),
+        pageBuilder: (context, animation, secondaryAnimation) => const CommIndexScreenSessions(),
         transitionDuration: Duration.zero,
         reverseTransitionDuration: Duration.zero,
       ),
@@ -265,13 +270,13 @@ class _MathIndexScreenSessionsState extends State<MathIndexScreenSessions> {
     );
   }
 
-  Future<void> _openCommunication() async {
+  Future<void> _openMathematics() async {
     await OrientationService().setLandscapeOnly();
     if (!mounted) return;
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => const CommIndexScreenSessions(),
+        builder: (_) => const MathIndexScreenSessions(),
       ),
     );
   }

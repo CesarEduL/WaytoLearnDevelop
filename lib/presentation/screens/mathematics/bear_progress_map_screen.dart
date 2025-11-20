@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:waytolearn/core/services/orientation_service.dart';
+import 'package:waytolearn/presentation/screens/communication/comm_index_screen_sessions.dart';
 import 'package:waytolearn/presentation/screens/communication/session_progress_screen.dart';
 import 'package:waytolearn/presentation/widgets/mathematics/home_icon_button.dart';
 import 'package:waytolearn/presentation/widgets/mathematics/communication_switch_button.dart';
@@ -91,7 +92,7 @@ class _BearProgressMapScreenState extends State<BearProgressMapScreen> {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => const SessionProgressScreen(),
+        builder: (_) => const CommIndexScreenSessions(),
       ),
     );
   }
