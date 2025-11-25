@@ -271,22 +271,41 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildParentsAreaCard(BuildContext context, UserService userService) {
     final user = userService.currentUser;
-    int currentSession = 1;
-    int storiesCompleted = 0;
-    double overallProgress = 0.0;
+    
+    // Datos de Comunicación
+    int commCurrentSession = 1;
+    int commStoriesCompleted = 0;
+    double commOverallProgress = 0.0;
+    
+    // Datos de Matemáticas
+    int mathCurrentSession = 1;
+    int mathStoriesCompleted = 0;
+    double mathOverallProgress = 0.0;
     
     if (user != null) {
-      final unlocked = user.getHighestUnlockedIndex('communication');
-      currentSession = (unlocked ~/ 7) + 1;
-      if (currentSession > 4) currentSession = 4;
+      // Cálculo Comunicación
+      final commUnlocked = user.getHighestUnlockedIndex('communication');
+      commCurrentSession = (commUnlocked ~/ 7) + 1;
+      if (commCurrentSession > 4) commCurrentSession = 4;
       
-      int storiesInCurrentSession = unlocked % 7;
-      if (storiesInCurrentSession == 0 && unlocked > 0) {
-        storiesInCurrentSession = 7;
+      int commStoriesInSession = commUnlocked % 7;
+      if (commStoriesInSession == 0 && commUnlocked > 0) {
+        commStoriesInSession = 7;
       }
+      commOverallProgress = (commUnlocked / 28.0).clamp(0.0, 1.0);
+      commStoriesCompleted = commStoriesInSession;
+
+      // Cálculo Matemáticas
+      final mathUnlocked = user.getHighestUnlockedIndex('mathematics');
+      mathCurrentSession = (mathUnlocked ~/ 7) + 1;
+      if (mathCurrentSession > 4) mathCurrentSession = 4;
       
-      overallProgress = (unlocked / 28.0).clamp(0.0, 1.0);
-      storiesCompleted = storiesInCurrentSession;
+      int mathStoriesInSession = mathUnlocked % 7;
+      if (mathStoriesInSession == 0 && mathUnlocked > 0) {
+        mathStoriesInSession = 7;
+      }
+      mathOverallProgress = (mathUnlocked / 28.0).clamp(0.0, 1.0);
+      mathStoriesCompleted = mathStoriesInSession;
     }
 
     return ModernChildCard(
@@ -297,7 +316,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         );
       },
       gradient: const LinearGradient(
-        colors: [Color(0xFFFF6B9D), Color(0xFFFF8C42)],
+        colors: [Color(0xFF6C63FF), Color(0xFF4FC3F7)], // Azul/Violeta para englobar ambos
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       ),
@@ -353,100 +372,77 @@ class _DashboardScreenState extends State<DashboardScreen> {
           
           const SizedBox(height: 20),
           
-          // Información de progreso
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Row(
-              children: [
-                // Sesión actual
-                Expanded(
+          // Información de progreso dividida
+          Row(
+            children: [
+              // Columna Comunicación
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.white.withOpacity(0.2)),
+                  ),
                   child: Column(
                     children: [
+                      const Text(
+                        'Comunicación',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
                       Text(
-                        'Sesión $currentSession',
+                        '${(commOverallProgress * 100).toInt()}%',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 4),
                       Text(
-                        'de 4',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
-                          fontSize: 14,
-                        ),
+                        'Sesión $commCurrentSession',
+                        style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12),
                       ),
                     ],
                   ),
                 ),
-                
-                Container(
-                  width: 2,
-                  height: 40,
-                  color: Colors.white.withOpacity(0.3),
-                ),
-                
-                // Cuentos completados
-                Expanded(
+              ),
+              
+              const SizedBox(width: 12),
+              
+              // Columna Matemáticas
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.white.withOpacity(0.2)),
+                  ),
                   child: Column(
                     children: [
+                      const Text(
+                        'Matemáticas',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
                       Text(
-                        '$storiesCompleted/7',
+                        '${(mathOverallProgress * 100).toInt()}%',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 4),
                       Text(
-                        'cuentos',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
-                          fontSize: 14,
-                        ),
+                        'Sesión $mathCurrentSession',
+                        style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12),
                       ),
                     ],
                   ),
                 ),
-                
-                Container(
-                  width: 2,
-                  height: 40,
-                  color: Colors.white.withOpacity(0.3),
-                ),
-                
-                // Progreso total
-                Expanded(
-                  child: Column(
-                    children: [
-                      Text(
-                        '${(overallProgress * 100).toInt()}%',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'progreso',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),

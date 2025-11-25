@@ -334,4 +334,40 @@ class UserService extends ChangeNotifier {
   void clearError() {
     _clearError();
   }
+
+  Future<void> unlockNextStory(String subject, int currentStoryIndex) async {
+    if (_currentUser != null) {
+      try {
+        final Map<String, dynamic> currentProgress = Map.from(_currentUser!.progress);
+        final Map<String, dynamic> subjectProgress = 
+            Map.from(currentProgress[subject] ?? {'highestUnlockedIndex': 0, 'completedStories': []});
+        
+        int highestUnlocked = subjectProgress['highestUnlockedIndex'] ?? 0;
+        List<String> completedStories = List<String>.from(subjectProgress['completedStories'] ?? []);
+
+        // Marcar actual como completada
+        final String storyId = 'STORY_$currentStoryIndex';
+        if (!completedStories.contains(storyId)) {
+          completedStories.add(storyId);
+        }
+
+        // Desbloquear siguiente si es el actual el más alto
+        if (currentStoryIndex >= highestUnlocked) {
+          highestUnlocked = currentStoryIndex + 1;
+        }
+
+        subjectProgress['highestUnlockedIndex'] = highestUnlocked;
+        subjectProgress['completedStories'] = completedStories;
+        currentProgress[subject] = subjectProgress;
+
+        final UserModel updatedUser = _currentUser!.copyWith(
+          progress: currentProgress,
+        );
+
+        await updateUserProfile(updatedUser);
+      } catch (e) {
+        _setError('Error al desbloquear siguiente nivel: $e');
+      }
+    }
+  }
 }

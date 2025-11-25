@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:waytolearn/core/services/orientation_service.dart';
 import 'package:waytolearn/presentation/screens/communication/comm_index_screen_sessions.dart';
-import 'package:waytolearn/presentation/screens/communication/session_progress_screen.dart';
 import 'package:waytolearn/presentation/screens/mathematics/bear_progress_map_screen.dart';
 import 'package:waytolearn/presentation/screens/main/dashboard_screen.dart';
 import 'package:waytolearn/presentation/widgets/mathematics/home_icon_button.dart';
 import 'package:waytolearn/presentation/widgets/mathematics/communication_switch_button.dart';
 import 'package:waytolearn/presentation/widgets/mathematics/progress_banner.dart';
-import 'package:waytolearn/presentation/widgets/mathematics/empty_box_widget.dart';
+import 'package:waytolearn/presentation/widgets/communication/session_box_widget.dart'; // Reutilizando el widget mejorado
 import 'package:waytolearn/presentation/widgets/mathematics/mathematics_bottom_bot.dart';
 
 class MathIndexScreenSessions extends StatefulWidget {
@@ -24,9 +23,9 @@ class _MathIndexScreenSessionsState extends State<MathIndexScreenSessions> {
   double _subjectProgress = 0.5; // Variable para el progreso de la materia (0.0 a 1.0)
   String _subjectName = 'Matemática'; // Variable para el nombre de la materia
   
-  // Variables para EmptyBoxWidget (Sesión 1)
+  // Variables para Sesión 1
   String _session1Number = 'Sesión 1';
-  String _session1Theme = 'Tema de la sesión';
+  String _session1Theme = 'Números y Conteo';
   double _session1Progress = 1; // 0.0 a 1.0
   
   // Variables para Sesión 2
@@ -75,10 +74,47 @@ class _MathIndexScreenSessionsState extends State<MathIndexScreenSessions> {
     final scale = mediaSize.width / designWidth;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFE8F5E9), // Fondo verde muy suave
       body: Stack(
         fit: StackFit.expand,
         children: [
+          // --- Fondo Decorativo ---
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFFE0F2F1), // Teal muy suave
+                  Color(0xFFE8F5E9), // Verde muy suave
+                  Color(0xFFFFFDE7), // Amarillo muy suave
+                ],
+              ),
+            ),
+          ),
+          
+          // Elementos flotantes (Figuras Geométricas para Matemáticas)
+          Positioned(
+            top: 40 * scale,
+            right: 80 * scale,
+            child: Icon(Icons.change_history, color: Colors.blue.withOpacity(0.2), size: 100 * scale), // Triángulo
+          ),
+          Positioned(
+            bottom: 60 * scale,
+            left: 40 * scale,
+            child: Icon(Icons.crop_square, color: Colors.green.withOpacity(0.2), size: 120 * scale), // Cuadrado
+          ),
+          Positioned(
+            top: 150 * scale,
+            left: 220 * scale,
+            child: Icon(Icons.circle_outlined, color: Colors.orange.withOpacity(0.2), size: 50 * scale), // Círculo
+          ),
+          Positioned(
+            bottom: 100 * scale,
+            right: 200 * scale,
+            child: Icon(Icons.star_border_rounded, color: Colors.purple.withOpacity(0.2), size: 60 * scale), // Estrella
+          ),
+
           Listener(
             behavior: HitTestBehavior.deferToChild,
             onPointerMove: (event) => _handlePointerMove(event.position),
@@ -115,77 +151,83 @@ class _MathIndexScreenSessionsState extends State<MathIndexScreenSessions> {
                 scale: scale,
               ),
             ),
-            // Sesión 1
+            // Sesión 1 - Verde Esmeralda
             Positioned(
               top: 245 * scale,
               left: 17 * scale,
-              child: EmptyBoxWidget(
+              child: SessionBoxWidget(
                 key: _session1Key,
                 scale: scale,
                 sessionNumber: _session1Number,
                 sessionTheme: _session1Theme,
                 progress: _session1Progress,
                 isHovered: _session1Hovered,
+                backgroundColor: const Color(0xFF4DB6AC), // Teal 300
+                sessionNumberColor: const Color(0xFF004D40),
+                sessionThemeColor: Colors.white,
+                progressBarColor1: const Color(0xFF80CBC4),
+                progressBarColor2: const Color(0xFF26A69A),
+                percentageColor: Colors.white,
                 onTap: () => _openBearProgressMap(),
               ),
             ),
-            // Sesión 2
+            // Sesión 2 - Azul Cielo
             Positioned(
               top: 245 * scale,
               left: 237 * scale,
-              child: EmptyBoxWidget(
+              child: SessionBoxWidget(
                 key: _session2Key,
                 scale: scale,
                 sessionNumber: _session2Number,
                 sessionTheme: _session2Theme,
                 progress: _session2Progress,
                 isHovered: _session2Hovered,
-                backgroundColor: const Color(0xFF7BF65C),
-                sessionNumberColor: const Color(0xFF583C95),
-                sessionThemeColor: const Color(0xFF34089B),
-                progressBarColor1: const Color(0xFF8A5CF6),
-                progressBarColor2: const Color(0xFF7595F7),
-                percentageColor: const Color(0xFFFFFFFF),
+                backgroundColor: const Color(0xFF4FC3F7), // Light Blue 300
+                sessionNumberColor: const Color(0xFF01579B),
+                sessionThemeColor: Colors.white,
+                progressBarColor1: const Color(0xFF81D4FA),
+                progressBarColor2: const Color(0xFF29B6F6),
+                percentageColor: Colors.white,
                 onTap: () => _openBearProgressMap(),
               ),
             ),
-            // Sesión 3
+            // Sesión 3 - Indigo
             Positioned(
               top: 245 * scale,
               left: 457 * scale,
-              child: EmptyBoxWidget(
+              child: SessionBoxWidget(
                 key: _session3Key,
                 scale: scale,
                 sessionNumber: _session3Number,
                 sessionTheme: _session3Theme,
                 progress: _session3Progress,
                 isHovered: _session3Hovered,
-                backgroundColor: const Color(0xFF8A5CF6),
-                sessionNumberColor: const Color(0xFF5CF6D7),
-                sessionThemeColor: const Color(0xFF7BF65C),
-                progressBarColor1: const Color(0xFFFF8C42),
-                progressBarColor2: const Color(0xFFFFB84D),
-                percentageColor: const Color(0xFFFFFFFF),
+                backgroundColor: const Color(0xFF7986CB), // Indigo 300
+                sessionNumberColor: const Color(0xFF1A237E),
+                sessionThemeColor: Colors.white,
+                progressBarColor1: const Color(0xFF9FA8DA),
+                progressBarColor2: const Color(0xFF5C6BC0),
+                percentageColor: Colors.white,
                 onTap: () => _openBearProgressMap(),
               ),
             ),
-            // Sesión 4
+            // Sesión 4 - Lima/Verde Claro
             Positioned(
               top: 245 * scale,
               left: 677 * scale,
-              child: EmptyBoxWidget(
+              child: SessionBoxWidget(
                 key: _session4Key,
                 scale: scale,
                 sessionNumber: _session4Number,
                 sessionTheme: _session4Theme,
                 progress: _session4Progress,
                 isHovered: _session4Hovered,
-                backgroundColor: const Color(0xFF8A5CF6),
-                sessionNumberColor: const Color(0xFF5CF6D7),
-                sessionThemeColor: const Color(0xFF7BF65C),
-                progressBarColor1: const Color(0xFFFF8C42),
-                progressBarColor2: const Color(0xFFFFB84D),
-                percentageColor: const Color(0xFFFFFFFF),
+                backgroundColor: const Color(0xFFDCE775), // Lime 300
+                sessionNumberColor: const Color(0xFF827717),
+                sessionThemeColor: const Color(0xFF33691E), // Texto oscuro para contraste
+                progressBarColor1: const Color(0xFFE6EE9C),
+                progressBarColor2: const Color(0xFFC0CA33),
+                percentageColor: const Color(0xFF33691E),
                 onTap: () => _openBearProgressMap(),
               ),
             ),
@@ -193,7 +235,7 @@ class _MathIndexScreenSessionsState extends State<MathIndexScreenSessions> {
               ],
             ),
           ),
-          // Bot de comunicación (fuera del Listener para que responda al tap)
+          // Bot de matemáticas
           Positioned(
             top: 345 * (MediaQuery.of(context).size.width / 912.0),
             left: 830 * (MediaQuery.of(context).size.width / 912.0),
@@ -244,7 +286,6 @@ class _MathIndexScreenSessionsState extends State<MathIndexScreenSessions> {
   }
 
   void _refreshScreen() {
-    // Recargar la pantalla completamente reemplazándola con una nueva instancia
     Navigator.pushReplacement(
       context,
       PageRouteBuilder(

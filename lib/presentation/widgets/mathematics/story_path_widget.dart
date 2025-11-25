@@ -92,18 +92,30 @@ class _StoryPathWidgetState extends State<StoryPathWidget> {
               final adjustedTop =
                   (position.dy * widget.scale) - (30 * widget.scale);
 
+              // Determinar si el cuento está bloqueado
+              // El primer cuento (0) siempre está desbloqueado.
+              // Los siguientes están desbloqueados si el anterior se completó.
+              // completedStoryIndex es el índice del último completado.
+              // Ejemplo: completed = 0 (cuento 1 completado).
+              // index 0: desbloqueado (siempre)
+              // index 1: desbloqueado (0 + 1 >= 1) -> TRUE
+              // index 2: bloqueado (0 + 1 < 2) -> TRUE (bloqueado)
+              final bool isLocked = index > widget.completedStoryIndex + 1;
+
               return Positioned(
                 key: _storyKeys[index],
                 left: adjustedLeft,
                 top: adjustedTop,
                 child: StoryNodeWidget(
                   storyIndex: index,
-                  // El primer cuento (index 0) siempre está activo.
-                  // Los demás dependen de si el índice es menor o igual al último completado.
-                  isCompleted:
-                      index == 0 || index <= widget.completedStoryIndex,
+                  isCompleted: index <= widget.completedStoryIndex,
+                  isLocked: isLocked,
                   isHovered: _hoveredStates[index],
-                  onTap: () => widget.onStoryTap?.call(index),
+                  onTap: () {
+                    if (!isLocked) {
+                      widget.onStoryTap?.call(index);
+                    }
+                  },
                   scale: widget.scale,
                 ),
               );

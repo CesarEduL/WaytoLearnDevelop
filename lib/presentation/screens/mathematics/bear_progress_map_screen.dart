@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:waytolearn/core/services/orientation_service.dart';
+import 'package:waytolearn/core/services/user_service.dart';
 import 'package:waytolearn/presentation/screens/communication/comm_index_screen_sessions.dart';
-import 'package:waytolearn/presentation/screens/communication/session_progress_screen.dart';
+import 'package:waytolearn/presentation/screens/mathematics/story_play_screen.dart';
 import 'package:waytolearn/presentation/widgets/mathematics/home_icon_button.dart';
 import 'package:waytolearn/presentation/widgets/mathematics/communication_switch_button.dart';
 import 'package:waytolearn/presentation/widgets/mathematics/mathematics_bottom_bot.dart';
@@ -36,6 +38,21 @@ class _BearProgressMapScreenState extends State<BearProgressMapScreen> {
     final mediaSize = MediaQuery.of(context).size;
     const designWidth = 912.0;
     final scale = mediaSize.width / designWidth;
+    
+    final userService = Provider.of<UserService>(context);
+    final user = userService.currentUser;
+    
+    // Obtener progreso real de matemáticas
+    // Asumimos que los primeros 7 niveles corresponden a la sesión 1
+    // Si el unlocked index es mayor a 6, significa que completó la sesión 1
+    int completedStoryIndex = -1;
+    if (user != null) {
+      final unlocked = user.getHighestUnlockedIndex('mathematics');
+      // Ajustar lógica según cómo se manejen las sesiones. 
+      // Si este mapa es SOLO para la sesión 1 (niveles 0-6):
+      completedStoryIndex = unlocked - 1;
+      if (completedStoryIndex > 6) completedStoryIndex = 6;
+    }
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -48,11 +65,11 @@ class _BearProgressMapScreenState extends State<BearProgressMapScreen> {
               top: 10 * scale,
               left: -20 * scale,
               child: StoryPathWidget(
-                completedStoryIndex: -1, // Ejemplo: 3 cuentos completados
+                completedStoryIndex: completedStoryIndex,
                 scale: scale,
                 onStoryTap: (index) {
                   debugPrint('Tapped story: ${index + 1}');
-                  // TODO: Navegar a la pantalla del cuento
+                  _navigateToStory(index);
                 },
               ),
             ),
@@ -86,6 +103,18 @@ class _BearProgressMapScreenState extends State<BearProgressMapScreen> {
     );
   }
 
+  Future<void> _navigateToStory(int index) async {
+    // Navegar a la pantalla de juego/cuento
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => StoryPlayScreen(storyIndex: index),
+      ),
+    );
+    
+    debugPrint('Navegando al cuento $index');
+  }
+
   Future<void> _openCommunication() async {
     await OrientationService().setLandscapeOnly();
     if (!mounted) return;
@@ -102,7 +131,7 @@ class _BearProgressMapScreenState extends State<BearProgressMapScreen> {
     Navigator.pushReplacement(
       context,
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => const MathIndexScreenSessions(),
+        pageBuilder: (context, animation, secondaryAnimation) => const BearProgressMapScreen(),
         transitionDuration: Duration.zero,
         reverseTransitionDuration: Duration.zero,
       ),
