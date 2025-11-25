@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/services/orientation_service.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../core/services/user_service.dart';
+import '../../../core/theme/child_colors.dart';
+import '../../../core/theme/child_text_styles.dart';
+import '../../../core/widgets/child_header.dart';
+import '../../../core/widgets/modern_child_card.dart';
 import '../../../core/widgets/orientation_aware_widget.dart';
+import '../auth/login_screen.dart';
 import '../profile/profile_screen.dart';
 import '../profile/progress_reports_screen.dart';
 import '../parents/parents_area_screen.dart';
 import '../communication/comm_index_screen_sessions.dart';
 import '../mathematics/math_index_screen_sessions.dart';
-
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -17,168 +22,122 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  // URL del oso desde Firebase Storage (usada en comunicación)
-  static const String _bearImageUrl =
-      'https://firebasestorage.googleapis.com/v0/b/waytolearn-3ebca.appspot.com/o/images%2FOSO%20CON%20UN%20LIBRO_%202.png?alt=media&token=ef9324fd-da34-49f3-a52b-7faf3121dc25';
-
   @override
   void initState() {
     super.initState();
-    // Asegurar que la orientación horizontal esté configurada
     OrientationService().setLandscapeOnly();
+  }
+
+  Future<void> _handleLogout(BuildContext context) async {
+    final shouldLogout = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('¿Cerrar sesión?'),
+        content: const Text('¿Estás seguro que quieres salir?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ChildColors.pinkSweet,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text('Salir'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldLogout == true && context.mounted) {
+      final userService = Provider.of<UserService>(context, listen: false);
+      await userService.signOut();
+      
+      if (context.mounted) {
+        await OrientationService().setPortraitOnly();
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final userService = Provider.of<UserService>(context);
+    final childName = userService.currentUser?.name ?? 'Amiguito';
+
     return OrientationAwareWidget(
       forceLandscape: true,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: ChildColors.background,
         drawer: _buildDrawer(context),
-        body: SafeArea(
-          child: Stack(
-            children: [
-              // Contenido con scroll
-              SingleChildScrollView(
-                padding: const EdgeInsets.only(top: 100),
-                child: Column(
-                  children: [
-                    // Banner púrpura de progreso
-                    _buildProgressBanner(),
-                    
-                    const SizedBox(height: 24),
-                    
-                    // Grid de bloques de contenido
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: _buildContentGrid(context),
-                    ),
-                    
-                    const SizedBox(height: 40),
-                  ],
-                ),
-              ),
-              
-              // Top bar con hamburger, oso y usuario
-              _buildTopBar(context),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTopBar(BuildContext context) {
-    return Positioned(
-      top: 0,
-      left: 0,
-      right: 0,
-      child: Container(
-        height: 100,
-        color: Colors.transparent,
-        child: Row(
+        body: Column(
           children: [
-            // Hamburger menu (izquierda)
-            Padding(
-              padding: const EdgeInsets.only(left: 16),
-              child: Builder(
-                builder: (ctx) => Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFB0BEC5), // Azul-gris claro
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: IconButton(
-                    icon: const Icon(Icons.menu, color: Colors.white),
-                    onPressed: () => Scaffold.of(ctx).openDrawer(),
-                  ),
-                ),
-              ),
+            // Header con nombre del niño y logout
+            ChildHeader(
+              childName: childName,
+              onLogout: () => _handleLogout(context),
             ),
             
-            // Oso centrado
+            // Contenido principal
             Expanded(
-              child: Center(
-                child: GestureDetector(
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('¡Hola! Soy tu compañero de aprendizaje'),
-                        backgroundColor: Colors.brown,
-                        duration: Duration(milliseconds: 800),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Título de bienvenida
+                    Text(
+                      '¿Qué quieres aprender hoy?',
+                      style: ChildTextStyles.title.copyWith(
+                        color: ChildColors.purpleMagic,
                       ),
-                    );
-                  },
-                  child: Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(50),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.brown.withOpacity(0.3),
-                          blurRadius: 10,
-                          offset: const Offset(0, 5),
+                    ),
+                    const SizedBox(height: 24),
+                    
+                    // Grid de categorías
+                    Row(
+                      children: [
+                        // Comunicación
+                        Expanded(
+                          child: _buildCategoryCard(
+                            context: context,
+                            title: 'Comunicación',
+                            icon: Icons.menu_book,
+                            gradient: ChildColors.blueGradient,
+                            onTap: () => _navigateToSubject(context, 'communication'),
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                        // Matemáticas
+                        Expanded(
+                          child: _buildCategoryCard(
+                            context: context,
+                            title: 'Matemáticas',
+                            icon: Icons.calculate,
+                            gradient: ChildColors.greenGradient,
+                            onTap: () => _navigateToSubject(context, 'math'),
+                          ),
                         ),
                       ],
                     ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(50),
-                      child: Image.network(
-                        _bearImageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            color: Colors.brown.shade300,
-                            child: const Icon(
-                              Icons.pets,
-                              size: 50,
-                              color: Colors.brown,
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            
-            // Ícono de usuario (derecha)
-            Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
-                  borderRadius: BorderRadius.circular(25),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
+                    
+                    const SizedBox(height: 24),
+                    
+                    // Tarjeta de Área de Padres
+                    _buildParentsAreaCard(context, userService),
+                    
+                    const SizedBox(height: 24),
+                    
+                    // Sección de progreso
+                    _buildProgressSection(),
                   ],
-                ),
-                child: IconButton(
-                  icon: const Icon(Icons.person, color: AppTheme.primaryColor),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const ProfileScreen(),
-                      ),
-                    );
-                  },
                 ),
               ),
             ),
@@ -188,300 +147,306 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildProgressBanner() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              const Color(0xFF7B2CBF), // Púrpura oscuro
-              const Color(0xFF9D4EDD), // Púrpura medio
+  Widget _buildCategoryCard({
+    required BuildContext context,
+    required String title,
+    required IconData icon,
+    required Gradient gradient,
+    required VoidCallback onTap,
+  }) {
+    return ModernChildCard(
+      onTap: onTap,
+      gradient: gradient,
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Icono grande
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.3),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              icon,
+              size: 48,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Título
+          Text(
+            title,
+            style: ChildTextStyles.subtitle.copyWith(color: Colors.white),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          // Botón de acción
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Text(
+              '¡Vamos!',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProgressSection() {
+    return ModernChildCard(
+      color: Colors.white,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.emoji_events,
+                color: ChildColors.yellowSun,
+                size: 32,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Tu Progreso',
+                style: ChildTextStyles.subtitle.copyWith(
+                  color: ChildColors.purpleMagic,
+                ),
+              ),
             ],
           ),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.purple.withOpacity(0.3),
-              blurRadius: 15,
-              offset: const Offset(0, 8),
+          const SizedBox(height: 16),
+          _buildProgressItem('Comunicación', 0.6, ChildColors.blueSky),
+          const SizedBox(height: 12),
+          _buildProgressItem('Matemáticas', 0.3, ChildColors.greenHappy),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProgressItem(String title, double progress, Color color) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              title,
+              style: ChildTextStyles.body,
+            ),
+            Text(
+              '${(progress * 100).toInt()}%',
+              style: ChildTextStyles.body.copyWith(
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
             ),
           ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        const SizedBox(height: 8),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: LinearProgressIndicator(
+            value: progress,
+            minHeight: 12,
+            backgroundColor: color.withOpacity(0.2),
+            valueColor: AlwaysStoppedAnimation<Color>(color),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildParentsAreaCard(BuildContext context, UserService userService) {
+    final user = userService.currentUser;
+    int currentSession = 1;
+    int storiesCompleted = 0;
+    double overallProgress = 0.0;
+    
+    if (user != null) {
+      final unlocked = user.getHighestUnlockedIndex('communication');
+      currentSession = (unlocked ~/ 7) + 1;
+      if (currentSession > 4) currentSession = 4;
+      
+      int storiesInCurrentSession = unlocked % 7;
+      if (storiesInCurrentSession == 0 && unlocked > 0) {
+        storiesInCurrentSession = 7;
+      }
+      
+      overallProgress = (unlocked / 28.0).clamp(0.0, 1.0);
+      storiesCompleted = storiesInCurrentSession;
+    }
+
+    return ModernChildCard(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ParentsAreaScreen()),
+        );
+      },
+      gradient: const LinearGradient(
+        colors: [Color(0xFFFF6B9D), Color(0xFFFF8C42)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Título con icono
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.3),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.family_restroom,
+                  color: Colors.white,
+                  size: 32,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Área de Padres',
+                      style: ChildTextStyles.subtitle.copyWith(
+                        color: Colors.white,
+                        fontSize: 22,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Ver progreso detallado',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.9),
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios,
+                color: Colors.white.withOpacity(0.8),
+                size: 24,
+              ),
+            ],
+          ),
+          
+          const SizedBox(height: 20),
+          
+          // Información de progreso
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
               children: [
-                // Lado izquierdo: textos
+                // Sesión actual
                 Expanded(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Aprendizaje en curso',
-                        style: TextStyle(
-                          color: Colors.cyan.shade300,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      const Text(
-                        'Sesión 2',
-                        style: TextStyle(
+                        'Sesión $currentSession',
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 4),
-                      const Text(
-                        'Palabras con Magia',
+                      Text(
+                        'de 4',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: Colors.white.withOpacity(0.8),
                           fontSize: 14,
-                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
                   ),
                 ),
                 
-                // Lado derecho: Comunicación 45% y cofre
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    const Text(
-                      'Comunicación',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
+                Container(
+                  width: 2,
+                  height: 40,
+                  color: Colors.white.withOpacity(0.3),
+                ),
+                
+                // Cuentos completados
+                Expanded(
+                  child: Column(
+                    children: [
+                      Text(
+                        '$storiesCompleted/7',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    const Text(
-                      '45%',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                      const SizedBox(height: 4),
+                      Text(
+                        'cuentos',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.8),
+                          fontSize: 14,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF8B4513), // Marrón del cofre
-                        borderRadius: BorderRadius.circular(6),
+                    ],
+                  ),
+                ),
+                
+                Container(
+                  width: 2,
+                  height: 40,
+                  color: Colors.white.withOpacity(0.3),
+                ),
+                
+                // Progreso total
+                Expanded(
+                  child: Column(
+                    children: [
+                      Text(
+                        '${(overallProgress * 100).toInt()}%',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                      child: const Icon(
-                        Icons.inventory_2,
-                        color: Colors.white,
-                        size: 18,
+                      const SizedBox(height: 4),
+                      Text(
+                        'progreso',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.8),
+                          fontSize: 14,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
-            
-            const SizedBox(height: 16),
-            
-            // Barra de progreso
-            Container(
-              height: 8,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(4),
-                color: Colors.white.withOpacity(0.3),
-              ),
-              child: FractionallySizedBox(
-                alignment: Alignment.centerLeft,
-                widthFactor: 0.45,
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(4),
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.cyan.shade300,
-                        Colors.cyan.shade400,
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildContentGrid(BuildContext context) {
-    return Column(
-      children: [
-        // Primera fila: 3 bloques pequeños
-        Row(
-          children: [
-            Expanded(
-              child: _buildSmallBlock(
-                const Color(0xFF8B5CF6), // Púrpura
-                null,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildSmallBlock(
-                const Color(0xFF84CC16), // Verde lima
-                null,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildSmallBlock(
-                const Color(0xFF14B8A6), // Teal
-                null,
-              ),
-            ),
-          ],
-        ),
-        
-        const SizedBox(height: 16),
-        
-        // Segunda fila: 2 bloques grandes
-        Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: _buildLargeBlock(
-                const Color(0xFFEC4899), // Rosa
-                Icons.calculate,
-                'Matemáticas',
-                () => _navigateToSubject(context, 'mathematics'),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              flex: 2,
-              child: _buildLargeBlock(
-                const Color(0xFF14B8A6), // Teal
-                Icons.menu_book,
-                'Comunicación',
-                () => _navigateToSubject(context, 'communication'),
-              ),
-            ),
-          ],
-        ),
-        
-        const SizedBox(height: 16),
-        
-        // Tercera fila: 2 bloques largos
-        Row(
-          children: [
-            Expanded(
-              child: _buildLongBlock(
-                const Color(0xFFFCD34D), // Amarillo
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildLongBlock(
-                const Color(0xFFFB923C), // Naranja
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-  
-  Widget _buildSmallBlock(Color color, IconData? icon) {
-    return Container(
-      height: 120,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.3),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Center(
-        child: Container(
-          width: 60,
-          height: 60,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-      ),
-    );
-  }
-  
-  Widget _buildLargeBlock(Color color, IconData icon, String title, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 180,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: color.withOpacity(0.3),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
-            ),
-          ],
-        ),
-        child: Stack(
-          children: [
-            // Icono en la esquina superior izquierda
-            Positioned(
-              top: 16,
-              left: 16,
-              child: Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  icon,
-                  color: Colors.white,
-                  size: 28,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-  
-  Widget _buildLongBlock(Color color) {
-    return Container(
-      height: 100,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.3),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
           ),
         ],
       ),
@@ -489,26 +454,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _navigateToSubject(BuildContext context, String subject) async {
-    print('🔍 _navigateToSubject llamado con: $subject');
-    
     if (subject == 'communication') {
-      print('✅ Entrando a Comunicación');
       await OrientationService().setLandscapeOnly();
-      
       if (!context.mounted) return;
-      
       await Navigator.push(
         context,
         MaterialPageRoute(
           builder: (_) => const CommIndexScreenSessions(),
         ),
       );
-      
-      
-      
     } else {
-      // Matemáticas
-      print('✅ Entrando a Matemáticas');
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -518,21 +473,47 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-
   Drawer _buildDrawer(BuildContext context) {
     return Drawer(
       child: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const ListTile(
-              leading: CircleAvatar(child: Icon(Icons.person)),
-              title: Text('Tu hijo/a'),
+            // Header del drawer
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: ChildColors.purpleGradient,
+              ),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 30,
+                    backgroundColor: Colors.white,
+                    child: Icon(
+                      Icons.person,
+                      size: 36,
+                      color: ChildColors.purpleMagic,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Text(
+                      'Menú',
+                      style: ChildTextStyles.subtitle.copyWith(
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const Divider(),
+            const Divider(height: 1),
+            
+            // Opciones del menú
             ListTile(
-              leading: const Icon(Icons.insert_chart_outlined),
-              title: const Text('Informes de progreso'),
+              leading: const Icon(Icons.insert_chart_outlined, size: 28),
+              title: const Text('Informes de progreso', style: ChildTextStyles.body),
               onTap: () {
                 Navigator.push(
                   context,
@@ -543,8 +524,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text('Área de padres'),
+              leading: const Icon(Icons.family_restroom, size: 28),
+              title: const Text('Área de padres', style: ChildTextStyles.body),
               onTap: () {
                 Navigator.push(
                   context,
@@ -552,6 +533,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     builder: (_) => const ParentsAreaScreen(),
                   ),
                 );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.person, size: 28),
+              title: const Text('Mi perfil', style: ChildTextStyles.body),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const ProfileScreen(),
+                  ),
+                );
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: Icon(Icons.logout, size: 28, color: ChildColors.pinkSweet),
+              title: Text(
+                'Cerrar sesión',
+                style: ChildTextStyles.body.copyWith(color: ChildColors.pinkSweet),
+              ),
+              onTap: () {
+                Navigator.pop(context); // Cerrar drawer
+                _handleLogout(context);
               },
             ),
           ],

@@ -24,26 +24,23 @@ class _StoryPathWidgetState extends State<StoryPathWidget> {
 
   // Coordenadas de los 7 cuentos desde pathPoints (actualizadas sin duplicados)
   static const List<Offset> storyPositions = [
-    Offset(130.0, 224.51),    // Cuento 1 - P0
-    Offset(246.0, 71.0),      // Cuento 2 - P3
-    Offset(363.0, 224.51),    // Cuento 3 - P5
-    Offset(485.5, 375.0),     // Cuento 4 - P7
-    Offset(596.0, 224.51),    // Cuento 5 - P9
-    Offset(712.25, 71.0),     // Cuento 6 - P11
-    Offset(828.5, 222),     // Cuento 7 - P13
+    Offset(130.0, 224.51), // Cuento 1 - P0
+    Offset(246.0, 71.0), // Cuento 2 - P3
+    Offset(363.0, 224.51), // Cuento 3 - P5
+    Offset(485.5, 375.0), // Cuento 4 - P7
+    Offset(596.0, 224.51), // Cuento 5 - P9
+    Offset(712.25, 71.0), // Cuento 6 - P11
+    Offset(828.5, 222), // Cuento 7 - P13
   ];
 
   void _handlePointerMove(PointerEvent details) {
     for (int i = 0; i < _storyKeys.length; i++) {
-      final RenderBox? box = _storyKeys[i].currentContext?.findRenderObject() as RenderBox?;
+      final RenderBox? box =
+          _storyKeys[i].currentContext?.findRenderObject() as RenderBox?;
       if (box != null) {
         final position = box.localToGlobal(Offset.zero);
         final bounds = Rect.fromLTWH(
-          position.dx, 
-          position.dy, 
-          70 * widget.scale, 
-          60 * widget.scale
-        );
+            position.dx, position.dy, 70 * widget.scale, 60 * widget.scale);
 
         if (bounds.contains(details.position)) {
           if (!_hoveredStates[i]) {
@@ -61,9 +58,9 @@ class _StoryPathWidgetState extends State<StoryPathWidget> {
   @override
   Widget build(BuildContext context) {
     // Dimensiones optimizadas para pantalla 912px
-    const double baseWidth = 912.0;  // Coincide con designWidth
+    const double baseWidth = 912.0; // Coincide con designWidth
     const double baseHeight = 450.0;
-    
+
     final scaledWidth = baseWidth * widget.scale;
     final scaledHeight = baseHeight * widget.scale;
 
@@ -90,8 +87,10 @@ class _StoryPathWidgetState extends State<StoryPathWidget> {
             ...List.generate(7, (index) {
               final position = storyPositions[index];
               // Centrar el widget de 70x60 sobre la coordenada (con escala)
-              final adjustedLeft = (position.dx * widget.scale) - (35 * widget.scale);
-              final adjustedTop = (position.dy * widget.scale) - (30 * widget.scale);
+              final adjustedLeft =
+                  (position.dx * widget.scale) - (35 * widget.scale);
+              final adjustedTop =
+                  (position.dy * widget.scale) - (30 * widget.scale);
 
               return Positioned(
                 key: _storyKeys[index],
@@ -99,7 +98,10 @@ class _StoryPathWidgetState extends State<StoryPathWidget> {
                 top: adjustedTop,
                 child: StoryNodeWidget(
                   storyIndex: index,
-                  isCompleted: index <= widget.completedStoryIndex,
+                  // El primer cuento (index 0) siempre está activo.
+                  // Los demás dependen de si el índice es menor o igual al último completado.
+                  isCompleted:
+                      index == 0 || index <= widget.completedStoryIndex,
                   isHovered: _hoveredStates[index],
                   onTap: () => widget.onStoryTap?.call(index),
                   scale: widget.scale,

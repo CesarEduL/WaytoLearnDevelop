@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:waytolearn/core/services/orientation_service.dart';
 import 'package:waytolearn/presentation/screens/main/dashboard_screen.dart';
 import 'package:waytolearn/presentation/screens/mathematics/math_index_screen_sessions.dart';
+import 'package:provider/provider.dart';
+import 'package:waytolearn/core/services/user_service.dart';
+import 'package:waytolearn/core/services/session_service.dart';
 import 'package:waytolearn/presentation/screens/communication/story_detail_screen.dart';
 
 import 'package:waytolearn/presentation/widgets/communication/home_icon_button.dart';
@@ -11,7 +14,9 @@ import 'package:waytolearn/presentation/widgets/communication/communication_bott
 import 'package:waytolearn/presentation/widgets/communication/story_path_widget.dart';
 
 class BearProgressMapScreen extends StatefulWidget {
-  const BearProgressMapScreen({super.key});
+  final String? sessionId;
+  
+  const BearProgressMapScreen({super.key, this.sessionId});
 
   @override
   State<BearProgressMapScreen> createState() => _BearProgressMapScreenState();
@@ -77,13 +82,53 @@ class _BearProgressMapScreenState extends State<BearProgressMapScreen> {
         fit: StackFit.expand,
         clipBehavior: Clip.none,
         children: [
+          // Consumir datos del usuario para mostrar progreso real
           Positioned(
             top: 10 * scale,
             left: -20 * scale,
-            child: StoryPathWidget(
-              completedStoryIndex: 0,
-              scale: scale,
-              onStoryTap: _navigateToStory, // Usa la función corregida
+            child: Consumer<UserService>(
+              builder: (context, userService, child) {
+                final user = userService.currentUser;
+                int completedIndex = -1; // -1 significa ninguno completado (solo el 0 desbloqueado)
+                
+                if (user != null) {
+                  // Obtenemos el índice desbloqueado (0-6)
+                  // Si desbloqueado es 0, completado es -1 (ninguno)
+                  // Si desbloqueado es 1, completado es 0 (el primero)
+                  // La lógica visual del widget espera "completedStoryIndex"
+                  final unlocked = user.getHighestUnlockedIndex('communication');
+                  completedIndex = unlocked - 1;
+                }
+
+                return StoryPathWidget(
+                  completedStoryIndex: completedIndex,
+                  scale: scale,
+                  onStoryTap: (index) {
+                    // Lógica de desbloqueo:
+                    // 1. Si el usuario es null (no logueado), permitimos SOLO el primero (índice 0).
+                    // 2. Si el usuario existe, verificamos su progreso real.
+                    
+                    bool isUnlocked = false;
+                    
+                    if (user == null) {
+                      isUnlocked = index == 0;
+                    } else {
+                      isUnlocked = user.isStoryUnlocked('communication', index);
+                    }
+
+                    if (isUnlocked) {
+                      _navigateToStory(index);
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('¡Completa los cuentos anteriores para desbloquear este!'),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                  },
+                );
+              },
             ),
           ),
           Positioned(

@@ -7,19 +7,23 @@ import '../models/user_model.dart';
 
 class UserService extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  bool _googleInitialized = false;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   UserModel? _currentUser;
   bool _isLoading = false;
   String? _errorMessage;
+  bool _googleInitialized = false;
 
-  // Getters
+  // Getters públicos
   UserModel? get currentUser => _currentUser;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
-  bool get isAuthenticated => _auth.currentUser != null;
-  User? get firebaseUser => _auth.currentUser;
+  bool get isAuthenticated => _currentUser != null;
+
+  // Setters públicos opcionales
+  set currentUser(UserModel? user) => _currentUser = user;
+  set isLoading(bool loading) => _isLoading = loading;
+  set errorMessage(String? error) => _errorMessage = error;
 
   UserService() {
     _initializeAuthStateListener();
@@ -40,33 +44,55 @@ class UserService extends ChangeNotifier {
     try {
       _setLoading(true);
       _clearError();
+      debugPrint('UserService: Starting Google Sign-In...');
 
-      // Inicializar Google Sign-In (solo una vez)
       if (!_googleInitialized) {
-        await GoogleSignIn.instance.initialize(
-          serverClientId: dotenv.env['FIREBASE_WEB_CLIENT_ID'],
-        );
-        _googleInitialized = true;
+        try {
+          final clientId = dotenv.env['FIREBASE_WEB_CLIENT_ID'];
+          debugPrint('UserService: Initializing GoogleSignIn with clientId: ${clientId != null ? "FOUND" : "MISSING"}');
+
+          if (clientId != null && clientId.isNotEmpty) {
+            await GoogleSignIn.instance.initialize(
+              serverClientId: clientId,
+            );
+          } else {
+            await GoogleSignIn.instance.initialize();
+          }
+          _googleInitialized = true;
+          debugPrint('UserService: GoogleSignIn initialized successfully');
+        } catch (e) {
+          debugPrint('UserService: Warning - GoogleSignIn initialization failed: $e');
+        }
       }
 
-      // Iniciar sesión interactiva
-      GoogleSignInAccount googleUser;
+      GoogleSignInAccount? googleUser;
       try {
         googleUser = await GoogleSignIn.instance.authenticate();
+        debugPrint('UserService: Google authentication completed. User: ${googleUser?.email}');
       } on GoogleSignInException catch (e) {
+        debugPrint('UserService: GoogleSignInException: ${e.code} - $e');
         if (e.code == GoogleSignInExceptionCode.canceled ||
             e.code == GoogleSignInExceptionCode.interrupted ||
             e.code == GoogleSignInExceptionCode.uiUnavailable) {
-          _setError('Inicio de sesión cancelado');
+          _setError('Inicio de sesión cancelado por el usuario');
           return false;
         }
         rethrow;
+      } catch (e) {
+        debugPrint('UserService: Unknown error during authenticate: $e');
+        rethrow;
       }
 
-      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+      if (googleUser == null) {
+        _setError('No se pudo obtener la cuenta de Google');
+        return false;
+      }
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       final String? idToken = googleAuth.idToken;
+
       if (idToken == null) {
-        _setError('No se obtuvo idToken de Google');
+        _setError('No se obtuvieron credenciales de Google (idToken nulo)');
         return false;
       }
 
@@ -74,18 +100,51 @@ class UserService extends ChangeNotifier {
         idToken: idToken,
       );
 
+      debugPrint('UserService: Signing in to Firebase with credential...');
       final UserCredential userCredential = await _auth.signInWithCredential(credential);
       final User? user = userCredential.user;
 
       if (user != null) {
+        debugPrint('UserService: Firebase sign in successful. User UID: ${user.uid}');
         await _handleUserSignIn(user);
         return true;
       } else {
-        _setError('Error al crear la cuenta de usuario');
+        _setError('Error al crear la cuenta de usuario en Firebase');
         return false;
       }
     } catch (e) {
+      debugPrint('UserService: Critical error in signInWithGoogle: $e');
       _setError('Error durante el inicio de sesión: $e');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<bool> signInAsGuest() async {
+    try {
+      _setLoading(true);
+      _clearError();
+      debugPrint('UserService: Starting Guest Sign-In...');
+
+      final UserCredential userCredential = await _auth.signInAnonymously();
+      final User? user = userCredential.user;
+
+      if (user != null) {
+        debugPrint('UserService: Guest sign in successful. User UID: ${user.uid}');
+        await _handleUserSignIn(user);
+        return true;
+      } else {
+        _setError('Error al iniciar sesión como invitado (User es null)');
+        return false;
+      }
+    } catch (e) {
+      debugPrint('UserService: Error in signInAsGuest: $e');
+      if (e is FirebaseAuthException) {
+         _setError('Error de Firebase: [${e.code}] ${e.message}');
+      } else {
+         _setError('Error al ingresar como invitado: $e');
+      }
       return false;
     } finally {
       _setLoading(false);
@@ -94,18 +153,15 @@ class UserService extends ChangeNotifier {
 
   Future<void> _handleUserSignIn(User user) async {
     try {
-      // Verificar si el usuario ya existe en Firestore
       final DocumentSnapshot userDoc = await _firestore
           .collection('users')
           .doc(user.uid)
           .get();
 
       if (userDoc.exists) {
-        // Usuario existente - cargar datos
         await _loadUserData(user.uid);
         await _updateLastLogin(user.uid);
       } else {
-        // Usuario nuevo - crear perfil
         await _createUserProfile(user);
       }
     } catch (e) {
@@ -120,8 +176,8 @@ class UserService extends ChangeNotifier {
         name: user.displayName ?? 'Usuario',
         email: user.email ?? '',
         photoUrl: user.photoURL,
-        age: 0, // Valor por defecto
-        grade: 'Primer grado', // Valor por defecto
+        age: 0,
+        grade: 'Primer grado',
         avatar: 'default_avatar',
         totalPoints: 0,
         currentLevel: 1,
@@ -140,6 +196,11 @@ class UserService extends ChangeNotifier {
           .set(newUser.toMap());
 
       _currentUser = newUser;
+      
+      // Inicializar sesiones para el nuevo usuario
+      // Nota: SessionService se inicializará desde el login
+      debugPrint('User profile created successfully for ${user.uid}');
+      
       notifyListeners();
     } catch (e) {
       _setError('Error al crear el perfil del usuario: $e');
@@ -172,7 +233,6 @@ class UserService extends ChangeNotifier {
         'lastLoginAt': Timestamp.fromDate(DateTime.now()),
       });
     } catch (e) {
-      // No es crítico si falla la actualización del último login
       debugPrint('Error al actualizar último login: $e');
     }
   }
@@ -182,7 +242,6 @@ class UserService extends ChangeNotifier {
       _setLoading(true);
       _clearError();
 
-      // Cerrar sesión Firebase y Google
       await _auth.signOut();
       try { await GoogleSignIn.instance.signOut(); } catch (_) {}
 
@@ -245,7 +304,7 @@ class UserService extends ChangeNotifier {
       try {
         final Map<String, int> newSubjectLevels = Map.from(_currentUser!.subjectLevels);
         newSubjectLevels[subject] = 1;
-        
+
         final UserModel updatedUser = _currentUser!.copyWith(
           subjectLevels: newSubjectLevels,
         );

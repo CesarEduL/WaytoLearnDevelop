@@ -35,7 +35,7 @@ class _OrientationAwareWidgetState extends State<OrientationAwareWidget> {
         if (widget.forceLandscape && orientation == Orientation.portrait) {
           return _buildRotateMessage();
         }
-        
+
         return widget.child;
       },
     );
@@ -86,7 +86,8 @@ class _OrientationAwareWidgetState extends State<OrientationAwareWidget> {
                     height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.blue[700]!),
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(Colors.blue[700]!),
                     ),
                   ),
                   const SizedBox(width: 8),

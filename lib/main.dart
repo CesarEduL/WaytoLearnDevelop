@@ -4,11 +4,13 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'core/services/user_service.dart';
+import 'core/services/session_service.dart';
 import 'core/providers/game_provider.dart';
 import 'core/services/story_service.dart';
 import 'core/providers/user_provider.dart';
 import 'core/providers/story_exercise_provider.dart';
 import 'core/providers/math_exercise_provider.dart';
+import 'core/providers/auth_provider.dart';
 import 'presentation/screens/splash_screen.dart';
 import 'core/theme/app_theme.dart';
 
@@ -22,7 +24,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  
+
   runApp(const WaytoLearnApp());
 }
 
@@ -39,9 +41,9 @@ class WaytoLearnApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => StoryService()),
         ChangeNotifierProvider(create: (_) => StoryExerciseProvider()),
         ChangeNotifierProvider(create: (_) => MathExerciseProvider()),
-
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => SessionService()),
       ],
-      
       child: MaterialApp(
         title: 'WaytoLearn',
         debugShowCheckedModeBanner: false,

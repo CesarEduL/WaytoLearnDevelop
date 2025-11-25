@@ -314,6 +314,92 @@ class GameProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // --- MÉTODOS DE PROGRESO DE CUENTOS (NUEVO) ---
+
+  /// Desbloquea el siguiente cuento para una materia
+  Future<void> unlockNextStory(String subject, String currentStoryId) async {
+    try {
+      // 1. Obtener usuario actual
+      // Nota: Necesitamos el ID del usuario. En una app real, esto vendría del AuthProvider
+      // o se pasaría como argumento. Asumiremos que se pasa o se obtiene de alguna forma.
+      // Por ahora, usaremos un método auxiliar para actualizar Firestore directamente
+      // si tenemos el ID del usuario en el estado (que no lo tenemos explícitamente aquí,
+      // pero asumiremos que se pasa el userId o se obtiene del contexto).
+      
+      // SOLUCIÓN: Este método debería llamarse desde la UI pasando el userId,
+      // o el GameProvider debería tener acceso al UserProvider.
+      // Para simplificar, actualizaremos el método para recibir userId.
+    } catch (e) {
+      _setError('Error al desbloquear siguiente cuento: $e');
+    }
+  }
+
+  /// Desbloquea el siguiente cuento para una materia
+  Future<void> unlockNextStoryForUser(String userId, String subject, int currentStoryIndex) async {
+    try {
+      // 1. Referencia al documento del usuario
+      final userRef = _firestore.collection('users').doc(userId);
+      
+      // 2. Obtener datos actuales
+      final userDoc = await userRef.get();
+      if (!userDoc.exists) return;
+      
+      final userData = userDoc.data()!;
+      final progress = Map<String, dynamic>.from(userData['progress'] ?? {});
+      final subjectProgress = Map<String, dynamic>.from(progress[subject] ?? {});
+      
+      // 3. Marcar cuento actual como completado
+      List<String> completed = List<String>.from(subjectProgress['completedStories'] ?? []);
+      String currentStoryId = "STORY_$currentStoryIndex";
+      if (!completed.contains(currentStoryId)) {
+        completed.add(currentStoryId);
+        subjectProgress['completedStories'] = completed;
+      }
+
+      // 4. Calcular nuevo índice desbloqueado
+      int currentUnlocked = subjectProgress['highestUnlockedIndex'] ?? 0;
+      
+      // Si completamos el último desbloqueado, avanzamos
+      if (currentStoryIndex == currentUnlocked) {
+        int nextIndex = currentUnlocked + 1;
+        // Límite de 7 cuentos (índices 0 a 6), así que el máximo unlocked puede ser 7
+        if (nextIndex > UserModel.maxStoriesPerModule) {
+          nextIndex = UserModel.maxStoriesPerModule; 
+        }
+        
+        subjectProgress['highestUnlockedIndex'] = nextIndex;
+      }
+      
+      progress[subject] = subjectProgress;
+      
+      // 5. Guardar en Firestore
+      await userRef.update({'progress': progress});
+      
+      // Notificar si es necesario (aunque esto actualiza Firestore, el stream del usuario debería recibir el cambio)
+      notifyListeners();
+      
+    } catch (e) {
+      debugPrint('Error unlocking story: $e');
+      _setError('Error al guardar progreso: $e');
+    }
+  }
+
+  /// Verifica si un cuento está desbloqueado (Helper local)
+  bool isStoryUnlocked(int storyIndex, int highestUnlockedIndex) {
+    return storyIndex <= highestUnlockedIndex;
+  }
+
+  // --- STUB PARA IA (NUEVO) ---
+  
+  /// Genera el contenido del siguiente cuento usando IA
+  Future<Map<String, dynamic>?> generateNextStoryWithAI(String subject, int level) async {
+    // TODO: Implementar llamada a Gemini API
+    // 1. Construir prompt: "Crea un cuento para un niño de nivel $level sobre $subject..."
+    // 2. Llamar a Cloud Function o API directa
+    // 3. Parsear respuesta JSON
+    return null;
+  }
+
   @override
   void dispose() {
     _availableExercises.clear();

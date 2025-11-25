@@ -17,6 +17,7 @@ class UserModel {
   final Map<String, dynamic> progress;
   final DateTime createdAt;
   final DateTime lastLoginAt;
+  final bool isGuest; // <-- Nuevo campo
 
   UserModel({
     required this.id,
@@ -35,6 +36,7 @@ class UserModel {
     this.progress = const {},
     required this.createdAt,
     required this.lastLoginAt,
+    this.isGuest = false, // <-- Valor por defecto
   });
 
   factory UserModel.fromMap(Map<String, dynamic> map, String id) {
@@ -49,12 +51,14 @@ class UserModel {
       totalPoints: map['totalPoints'] ?? 0,
       currentLevel: map['currentLevel'] ?? 1,
       experiencePoints: map['experiencePoints'] ?? 0,
-      subjectLevels: Map<String, int>.from(map['subjectLevels'] ?? {'mathematics': 1, 'communication': 1}),
+      subjectLevels: Map<String, int>.from(
+          map['subjectLevels'] ?? {'mathematics': 1, 'communication': 1}),
       achievements: List<String>.from(map['achievements'] ?? []),
       unlockedAvatars: List<String>.from(map['unlockedAvatars'] ?? []),
       progress: Map<String, dynamic>.from(map['progress'] ?? {}),
       createdAt: (map['createdAt'] as Timestamp).toDate(),
       lastLoginAt: (map['lastLoginAt'] as Timestamp).toDate(),
+      isGuest: map['isGuest'] ?? false, // <-- Leer desde Firestore
     );
   }
 
@@ -75,6 +79,7 @@ class UserModel {
       'progress': progress,
       'createdAt': Timestamp.fromDate(createdAt),
       'lastLoginAt': Timestamp.fromDate(lastLoginAt),
+      'isGuest': isGuest, // <-- Guardar en Firestore
     };
   }
 
@@ -95,6 +100,7 @@ class UserModel {
     Map<String, dynamic>? progress,
     DateTime? createdAt,
     DateTime? lastLoginAt,
+    bool? isGuest, // <-- Nuevo parámetro
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -113,41 +119,67 @@ class UserModel {
       progress: progress ?? this.progress,
       createdAt: createdAt ?? this.createdAt,
       lastLoginAt: lastLoginAt ?? this.lastLoginAt,
+      isGuest: isGuest ?? this.isGuest, // <-- Mantener valor
     );
   }
 
-  // Métodos de utilidad
-  int get experienceToNextLevel {
-    return currentLevel * 100;
-  }
+  // --- Métodos de utilidad ---
+  int get experienceToNextLevel => currentLevel * 100;
 
-  double get levelProgress {
-    return experiencePoints / experienceToNextLevel;
-  }
+  double get levelProgress => experiencePoints / experienceToNextLevel;
 
-  bool get canLevelUp {
-    return experiencePoints >= experienceToNextLevel;
-  }
+  bool get canLevelUp => experiencePoints >= experienceToNextLevel;
 
-  int getSubjectLevel(String subject) {
-    return subjectLevels[subject] ?? 1;
-  }
+  int getSubjectLevel(String subject) => subjectLevels[subject] ?? 1;
 
   UserModel addExperience(int points) {
     int newExperiencePoints = experiencePoints + points;
     int newTotalPoints = totalPoints + points;
     int newCurrentLevel = currentLevel;
-    
-    // Verificar si puede subir de nivel
+
     while (newExperiencePoints >= (newCurrentLevel * 100)) {
       newCurrentLevel++;
       newExperiencePoints -= (newCurrentLevel * 100);
     }
-    
+
     return copyWith(
       totalPoints: newTotalPoints,
       currentLevel: newCurrentLevel,
       experiencePoints: newExperiencePoints,
     );
+  }
+
+  // --- Nuevos métodos para progreso (7 Cuentos) ---
+  static const int maxStoriesPerModule = 7;
+
+  int getHighestUnlockedIndex(String subject) {
+    if (progress.containsKey(subject)) {
+      final subjectProgress = progress[subject] as Map<String, dynamic>;
+      return subjectProgress['highestUnlockedIndex'] ?? 0;
+    }
+    return 0;
+  }
+
+  bool isStoryUnlocked(String subject, int storyIndex) {
+    // El índice 0 siempre está desbloqueado
+    if (storyIndex == 0) return true;
+    return storyIndex <= getHighestUnlockedIndex(subject);
+  }
+
+  bool isStoryCompleted(String subject, int storyIndex) {
+    if (progress.containsKey(subject)) {
+      final subjectProgress = progress[subject] as Map<String, dynamic>;
+      final completedStories = List<String>.from(subjectProgress['completedStories'] ?? []);
+      // Asumimos que los IDs de los cuentos son "C01", "C02", etc. o simplemente índices
+      // Para simplificar, usaremos el formato "STORY_{index}" internamente o verificaremos el índice
+      // Si usamos IDs generados, deberíamos buscar ese ID.
+      // Por ahora, basémonos en el índice almacenado en completedStories si son strings, 
+      // o simplemente verifiquemos si el highestUnlockedIndex es mayor.
+      
+      // Estrategia más robusta: Verificar si el índice está en la lista de completados
+      // Asumiremos que guardamos "STORY_0", "STORY_1", etc.
+      return completedStories.contains('STORY_$storyIndex');
+    }
+    return false;
   }
 }

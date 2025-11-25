@@ -145,17 +145,24 @@ class _ParentsAreaScreenState extends State<ParentsAreaScreen> {
   }
 
   Widget _buildConnectedView(BuildContext context) {
-    return Column(
+    return SingleChildScrollView(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Sección "Tus hijos"
           _buildChildrenSection(),
           
-          const SizedBox(height: 40),
+          const SizedBox(height: 24),
+          
+          // Sección de progreso detallado
+          _buildDetailedProgressSection(),
+          
+          const SizedBox(height: 24),
           
           // Tarjetas de acción
           _buildActionCards(context),
         ],
+      ),
     );
   }
 
@@ -269,6 +276,349 @@ class _ParentsAreaScreenState extends State<ParentsAreaScreen> {
     );
   }
 
+  Widget _buildDetailedProgressSection() {
+    return Consumer<UserService>(
+      builder: (context, userService, _) {
+        final user = userService.currentUser;
+        
+        // Obtener datos de progreso
+        int currentSession = 1;
+        int storiesCompleted = 0;
+        int totalStories = 7;
+        double overallProgress = 0.0;
+        
+        if (user != null) {
+          final unlocked = user.getHighestUnlockedIndex('communication');
+          storiesCompleted = unlocked;
+          
+          // Calcular sesión actual (cada sesión tiene 7 cuentos)
+          currentSession = (unlocked ~/ 7) + 1;
+          if (currentSession > 4) currentSession = 4;
+          
+          // Cuentos completados en la sesión actual
+          int storiesInCurrentSession = unlocked % 7;
+          if (storiesInCurrentSession == 0 && unlocked > 0) {
+            storiesInCurrentSession = 7;
+          }
+          
+          // Progreso general (28 cuentos en total: 4 sesiones × 7 cuentos)
+          overallProgress = (unlocked / 28.0).clamp(0.0, 1.0);
+          
+          storiesCompleted = storiesInCurrentSession;
+        }
+        
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Título de la sección
+            Row(
+              children: [
+                Icon(
+                  Icons.analytics,
+                  color: const Color(0xFF7B2CBF),
+                  size: 28,
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  'Progreso Detallado',
+                  style: TextStyle(
+                    color: Color(0xFF7B2CBF),
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            
+            const SizedBox(height: 16),
+            
+            // Tarjetas de información
+            Row(
+              children: [
+                // Tarjeta de Sesión Actual
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF8B5CF6), Color(0xFF6366F1)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF8B5CF6).withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Sesión Actual',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Sesión $currentSession',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'de 4 sesiones',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.8),
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                
+                const SizedBox(width: 16),
+                
+                // Tarjeta de Cuentos Completados
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFEC4899), Color(0xFFF43F5E)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFEC4899).withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Cuentos',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '$storiesCompleted/$totalStories',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'en esta sesión',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.8),
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                
+                const SizedBox(width: 16),
+                
+                // Tarjeta de Nivel
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF14B8A6), Color(0xFF06B6D4)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF14B8A6).withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Progreso Total',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '${(overallProgress * 100).toInt()}%',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'completado',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.8),
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            
+            const SizedBox(height: 16),
+            
+            // Barra de progreso general
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Comunicación',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF7B2CBF),
+                        ),
+                      ),
+                      Text(
+                        '${user?.getHighestUnlockedIndex('communication') ?? 0}/28 cuentos',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF6B7280),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: LinearProgressIndicator(
+                      value: overallProgress,
+                      minHeight: 16,
+                      backgroundColor: const Color(0xFFE5E7EB),
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        Color(0xFF8B5CF6),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            const SizedBox(height: 16),
+            
+            // Asistencia de IA
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFFBBF24), Color(0xFFF59E0B)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFFBBF24).withOpacity(0.3),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.auto_awesome,
+                      color: Colors.white,
+                      size: 32,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Asistencia de IA',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          user != null 
+                            ? 'Ayudando con comprensión lectora y vocabulario'
+                            : 'No disponible sin cuenta',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.9),
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildActionCards(BuildContext context) {
     return Row(
       children: [
@@ -286,15 +636,27 @@ class _ParentsAreaScreenState extends State<ParentsAreaScreen> {
         ),
         const SizedBox(width: 16),
         Expanded(
-          child: _buildActionCard(
-            context,
-            const Color(0xFFEC4899), // Rosa
-            Icons.bar_chart,
-            'Progreso',
-            () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const ProgressReportsScreen()),
-            ),
+          child: Consumer<UserService>(
+            builder: (context, userService, _) {
+              final user = userService.currentUser;
+              String progressLabel = 'Progreso';
+              if (user != null) {
+                // Usar highestUnlockedIndex que ahora puede llegar a 7
+                final unlocked = user.getHighestUnlockedIndex('communication');
+                progressLabel = 'Progreso: $unlocked/7';
+              }
+              
+              return _buildActionCard(
+                context,
+                const Color(0xFFEC4899), // Rosa
+                Icons.bar_chart,
+                progressLabel,
+                () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ProgressReportsScreen()),
+                ),
+              );
+            }
           ),
         ),
         const SizedBox(width: 16),

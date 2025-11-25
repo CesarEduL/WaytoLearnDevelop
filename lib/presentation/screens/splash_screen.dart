@@ -87,18 +87,18 @@ class _SplashScreenState extends State<SplashScreen>
   void _startAnimations() async {
     // Iniciar animación del fondo
     _backgroundController.forward();
-    
+
     // Iniciar animación del logo
     await Future.delayed(const Duration(milliseconds: 300));
     await _logoController.forward();
-    
+
     // Iniciar animación del texto
     await Future.delayed(const Duration(milliseconds: 200));
     await _textController.forward();
-    
+
     // Esperar un poco más para que se vea la animación completa
     await Future.delayed(const Duration(milliseconds: 800));
-    
+
     // Navegar a la siguiente pantalla
     _navigateToNextScreen();
   }
@@ -106,11 +106,19 @@ class _SplashScreenState extends State<SplashScreen>
   void _navigateToNextScreen() async {
     // Cambiar a orientación horizontal antes de navegar
     await OrientationService().setLandscapeOnly();
-    
-    // Navegar directamente al dashboard sin verificar autenticación
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const DashboardScreen()),
-    );
+
+    if (!mounted) return;
+
+    final userService = Provider.of<UserService>(context, listen: false);
+
+    // Si el usuario está autenticado, ir al Dashboard. Si no, al Login.
+    if (userService.isAuthenticated) {
+      Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const DashboardScreen()));
+    } else {
+      Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const LoginScreen()));
+    }
   }
 
   @override
@@ -142,7 +150,7 @@ class _SplashScreenState extends State<SplashScreen>
               children: [
                 // Partículas de fondo animadas
                 _buildBackgroundParticles(),
-                
+
                 // Contenido principal con SafeArea y padding
                 SafeArea(
                   child: Padding(
@@ -154,14 +162,14 @@ class _SplashScreenState extends State<SplashScreen>
                           children: [
                             // Logo animado (placeholder Panda)
                             _buildAnimatedPanda(),
-                            
+
                             const SizedBox(height: 30),
-                            
+
                             // Título de la aplicación
                             _buildAnimatedTitle(),
-                            
+
                             const SizedBox(height: 40),
-                            
+
                             // Indicador de carga personalizado
                             _buildCustomLoadingIndicator(),
                           ],
@@ -201,7 +209,7 @@ class _SplashScreenState extends State<SplashScreen>
         final screenWidth = MediaQuery.of(context).size.width;
         final screenHeight = MediaQuery.of(context).size.height;
         final pandaSize = (screenWidth * 0.4).clamp(120.0, 200.0);
-        
+
         return Transform.scale(
           scale: _logoAnimation.value,
           child: Transform.rotate(
@@ -221,7 +229,7 @@ class _SplashScreenState extends State<SplashScreen>
         final screenWidth = MediaQuery.of(context).size.width;
         final titleFontSize = (screenWidth * 0.08).clamp(28.0, 44.0);
         final subtitleFontSize = (screenWidth * 0.04).clamp(14.0, 20.0);
-        
+
         return Opacity(
           opacity: _textAnimation.value,
           child: Transform.translate(
@@ -245,12 +253,13 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                   textAlign: TextAlign.center,
                 ),
-                
+
                 const SizedBox(height: 12),
-                
+
                 // Subtítulo
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.18),
                     borderRadius: BorderRadius.circular(20),
@@ -304,9 +313,9 @@ class _SplashScreenState extends State<SplashScreen>
                   backgroundColor: Colors.white.withOpacity(0.24),
                 ),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Texto de carga
               Text(
                 'Preparando tu aventura de aprendizaje...',
@@ -347,7 +356,7 @@ class ParticlePainter extends CustomPainter {
       final x = (i * 47.0) % size.width;
       final y = (i * 73.0 + animation * 100) % size.height;
       final radius = 2.0 + (i % 3) * 1.0;
-      
+
       canvas.drawCircle(
         Offset(x, y),
         radius,

@@ -74,10 +74,52 @@ class _CommIndexScreenSessionsState extends State<CommIndexScreenSessions> {
     final scale = mediaSize.width / designWidth;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF0F4F8), // Fondo base suave
       body: Stack(
         fit: StackFit.expand,
         children: [
+          // --- Fondo Decorativo ---
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFFE0F7FA), // Cyan muy suave
+                  Color(0xFFF3E5F5), // Púrpura muy suave
+                  Color(0xFFFFF3E0), // Naranja muy suave
+                ],
+              ),
+            ),
+          ),
+          
+          // Elementos flotantes (Nubes y Estrellas)
+          Positioned(
+            top: 50 * scale,
+            right: 100 * scale,
+            child: Icon(Icons.cloud, color: Colors.white.withOpacity(0.6), size: 120 * scale),
+          ),
+          Positioned(
+            bottom: 80 * scale,
+            left: 50 * scale,
+            child: Icon(Icons.cloud, color: Colors.white.withOpacity(0.4), size: 150 * scale),
+          ),
+          Positioned(
+            top: 150 * scale,
+            left: 200 * scale,
+            child: Icon(Icons.star_rounded, color: const Color(0xFFFFD54F).withOpacity(0.3), size: 40 * scale),
+          ),
+          Positioned(
+            bottom: 120 * scale,
+            right: 250 * scale,
+            child: Icon(Icons.star_rounded, color: const Color(0xFF4FC3F7).withOpacity(0.3), size: 50 * scale),
+          ),
+          Positioned(
+            top: 80 * scale,
+            left: 50 * scale,
+            child: Icon(Icons.circle, color: const Color(0xFFFF8A65).withOpacity(0.2), size: 20 * scale),
+          ),
+
           Listener(
             behavior: HitTestBehavior.deferToChild,
             onPointerMove: (event) => _handlePointerMove(event.position),
@@ -114,7 +156,7 @@ class _CommIndexScreenSessionsState extends State<CommIndexScreenSessions> {
                 scale: scale,
               ),
             ),
-            // Sesión 1
+            // Sesión 1 - Púrpura Pastel
             Positioned(
               top: 245 * scale,
               left: 17 * scale,
@@ -125,16 +167,16 @@ class _CommIndexScreenSessionsState extends State<CommIndexScreenSessions> {
                 sessionTheme: _session1Theme,
                 progress: _session1Progress,
                 isHovered: _session1Hovered,
-                backgroundColor: const Color(0xFF8A5CF6), // Amarillo naranja
-                sessionNumberColor: const Color(0xFF5CF6D7),
-                sessionThemeColor: const Color(0xFFC8F65C),
-                progressBarColor1: const Color(0xFFFF8C42),
-                progressBarColor2: const Color(0xFFFFB84D),
-                percentageColor: const Color(0xFFFFFFFF),
+                backgroundColor: const Color(0xFFB39DDB), // Deep Purple 200
+                sessionNumberColor: const Color(0xFF4527A0),
+                sessionThemeColor: Colors.white,
+                progressBarColor1: const Color(0xFF9575CD),
+                progressBarColor2: const Color(0xFF7E57C2),
+                percentageColor: Colors.white,
                 onTap: () => _openBearProgressMap(),
               ),
             ),
-            // Sesión 2
+            // Sesión 2 - Verde Pastel
             Positioned(
               top: 245 * scale,
               left: 237 * scale,
@@ -145,16 +187,16 @@ class _CommIndexScreenSessionsState extends State<CommIndexScreenSessions> {
                 sessionTheme: _session2Theme,
                 progress: _session2Progress,
                 isHovered: _session2Hovered,
-                backgroundColor: const Color(0xFF7BF65C), // Amarillo naranja
-                sessionNumberColor: const Color(0xFF583C95),
-                sessionThemeColor: const Color(0xFF34089B),
-                progressBarColor1: const Color(0xFF8A5CF6),
-                progressBarColor2: const Color(0xFF7595F7),
-                percentageColor: const Color(0xFFFFFFFF),
+                backgroundColor: const Color(0xFFA5D6A7), // Green 200
+                sessionNumberColor: const Color(0xFF1B5E20),
+                sessionThemeColor: Colors.white,
+                progressBarColor1: const Color(0xFF81C784),
+                progressBarColor2: const Color(0xFF66BB6A),
+                percentageColor: Colors.white,
                 onTap: () => _openBearProgressMap(),
               ),
             ),
-            // Sesión 3
+            // Sesión 3 - Azul Pastel
             Positioned(
               top: 245 * scale,
               left: 457 * scale,
@@ -165,16 +207,16 @@ class _CommIndexScreenSessionsState extends State<CommIndexScreenSessions> {
                 sessionTheme: _session3Theme,
                 progress: _session3Progress,
                 isHovered: _session3Hovered,
-                backgroundColor: const Color(0xFF5CF6D7), // Naranja
-                sessionNumberColor: const Color(0xFF080118),
-                sessionThemeColor: const Color(0xFFF65CC8),
-                progressBarColor1: const Color(0xFF8A5CF6),
-                progressBarColor2: const Color(0xFF7595F7),
-                percentageColor: const Color(0xFFFFFFFF),
+                backgroundColor: const Color(0xFF90CAF9), // Blue 200
+                sessionNumberColor: const Color(0xFF0D47A1),
+                sessionThemeColor: Colors.white,
+                progressBarColor1: const Color(0xFF64B5F6),
+                progressBarColor2: const Color(0xFF42A5F5),
+                percentageColor: Colors.white,
                 onTap: () => _openBearProgressMap(),
               ),
             ),
-            // Sesión 4
+            // Sesión 4 - Naranja Pastel
             Positioned(
               top: 245 * scale,
               left: 677 * scale,
@@ -185,26 +227,23 @@ class _CommIndexScreenSessionsState extends State<CommIndexScreenSessions> {
                 sessionTheme: _session4Theme,
                 progress: _session4Progress,
                 isHovered: _session4Hovered,
-                backgroundColor: const Color(0xFF5CF6D7), // Naranja
-                sessionNumberColor: const Color(0xFF080118),
-                sessionThemeColor: const Color(0xFFF65CC8),
-                progressBarColor1: const Color(0xFF8A5CF6),
-                progressBarColor2: const Color(0xFF7595F7),
-                percentageColor: const Color(0xFFFFFFFF),
+                backgroundColor: const Color(0xFFFFCC80), // Orange 200
+                sessionNumberColor: const Color(0xFFE65100),
+                sessionThemeColor: Colors.white,
+                progressBarColor1: const Color(0xFFFFB74D),
+                progressBarColor2: const Color(0xFFFFA726),
+                percentageColor: Colors.white,
                 onTap: () => _openBearProgressMap(),
               ),
             ),
-
-              ],
+            
+            // Botón flotante inferior (CommunicationBottomBot)
+            Positioned(
+              bottom: 20 * scale,
+              right: 20 * scale,
+              child: CommunicationBottomBot(scale: scale),
             ),
-          ),
-          // Bot de comunicación (fuera del Listener para que responda al tap)
-          Positioned(
-            top: 345 * (MediaQuery.of(context).size.width / 912.0),
-            left: 830 * (MediaQuery.of(context).size.width / 912.0),
-            child: CommunicationBottomBot(
-              scale: MediaQuery.of(context).size.width / 912.0,
-              onTap: _refreshScreen,
+              ],
             ),
           ),
         ],

@@ -20,15 +20,6 @@ class StoryMapWidget extends StatelessWidget {
     const designWidth = 912.0;
     final scale = mediaSize.width / designWidth;
 
-    // Define los colores basados en la materia
-    final Color pathColor = (subject == SubjectType.mathematics)
-        ? const Color(0xFF583C95)
-        : Colors.purple.shade300;
-
-    final Color bearColor = (subject == SubjectType.mathematics)
-        ? const Color(0xFF583C95)
-        : Colors.purple.shade400;
-
     return Stack(
       children: [
         Positioned(
@@ -37,11 +28,7 @@ class StoryMapWidget extends StatelessWidget {
           child: StoryPathWidget(
             completedStoryIndex: completedStories,
             scale: scale,
-            pathColor: pathColor,
-            bearColor: bearColor,
-            onStoryTap: (index) {
-              _navigateToStory(context, index);
-            },
+            onStoryTap: (index) => _navigateToStory(context, index),
           ),
         ),
       ],
@@ -50,12 +37,12 @@ class StoryMapWidget extends StatelessWidget {
 
   void _navigateToStory(BuildContext context, int index) {
     String storyId = "";
+
     if (subject == SubjectType.communication) {
-      // Asigna el ID del cuento basado en el índice.
-      // Ejemplo: C01, C02, etc.
+      // C01, C02, C03 ...
       storyId = "C${(index + 1).toString().padLeft(2, '0')}";
     } else {
-      // Lógica para cuentos de matemáticas si es necesario
+      // Para matemáticas más adelante:
       // storyId = "M${(index + 1).toString().padLeft(2, '0')}";
     }
 
@@ -67,8 +54,6 @@ class StoryMapWidget extends StatelessWidget {
           builder: (context) => StoryDetailScreen(storyId: storyId),
         ),
       );
-    } else {
-      debugPrint('No se ha definido una acción para esta historia.');
     }
   }
 }

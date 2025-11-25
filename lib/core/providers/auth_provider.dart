@@ -51,40 +51,35 @@ class AuthProvider extends ChangeNotifier {
       _setLoading(true);
       _clearError();
 
-      // Inicializar Google Sign-In
       await GoogleSignIn.instance.initialize(
         serverClientId: dotenv.env['FIREBASE_WEB_CLIENT_ID'],
       );
 
-      // Iniciar el flujo de Google Sign In
-      final GoogleSignInAccount? googleUser = await GoogleSignIn.instance.authenticate();
+      final GoogleSignInAccount? googleUser =
+          await GoogleSignIn.instance.authenticate();
       if (googleUser == null) {
         _setLoading(false);
         return false;
       }
 
-      // Obtener las credenciales de autenticación
       final GoogleSignInAuthentication googleAuth = googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
         idToken: googleAuth.idToken,
       );
 
-      // Iniciar sesión con Firebase
-      final UserCredential userCredential = await _auth.signInWithCredential(credential);
+      final UserCredential userCredential =
+          await _auth.signInWithCredential(credential);
       final User? user = userCredential.user;
 
       if (user != null) {
-        // Verificar si es un usuario nuevo
         final isNewUser = userCredential.additionalUserInfo?.isNewUser ?? false;
-        
+
         if (isNewUser) {
-          // Crear perfil de usuario para niños
           await _createChildProfile(user, googleUser);
         } else {
-          // Actualizar último login
           await _updateLastLogin(user.uid);
         }
-        
+
         _setLoading(false);
         return true;
       } else {
@@ -99,27 +94,67 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> _createChildProfile(User user, GoogleSignInAccount googleUser) async {
+  Future<bool> signInAsGuest() async {
     try {
-      // Crear perfil básico para niños
+      _setLoading(true);
+      _clearError();
+
+      final userCredential = await _auth.signInAnonymously();
+      final user = userCredential.user;
+
+      if (user != null) {
+        final userDoc =
+            await _firestore.collection('users').doc(user.uid).get();
+        if (!userDoc.exists) {
+          final guestProfile = UserModel(
+            id: user.uid,
+            name: 'Invitado',
+            email: 'guest@waytolearn.com',
+            age: 0,
+            grade: 'N/A',
+            avatar: 'default_avatar',
+            createdAt: DateTime.now(),
+            lastLoginAt: DateTime.now(),
+            isGuest: true,
+          );
+          await _firestore
+              .collection('users')
+              .doc(user.uid)
+              .set(guestProfile.toMap());
+          _userModel = guestProfile;
+        } else {
+          _userModel = UserModel.fromMap(userDoc.data()!, user.uid);
+        }
+        _setLoading(false);
+        return true;
+      }
+
+      _setLoading(false);
+      return false;
+    } catch (e) {
+      _setError('Error al ingresar como invitado: $e');
+      _setLoading(false);
+      return false;
+    }
+  }
+
+  Future<void> _createChildProfile(
+      User user, GoogleSignInAccount googleUser) async {
+    try {
       final userModel = UserModel(
         id: user.uid,
         name: googleUser.displayName ?? 'Niño',
         email: user.email ?? '',
         photoUrl: user.photoURL,
-        age: 8, // Edad por defecto, se puede cambiar después
-        grade: '2do Grado', // Grado por defecto
+        age: 8,
+        grade: '2do Grado',
         avatar: 'default_avatar',
         createdAt: DateTime.now(),
         lastLoginAt: DateTime.now(),
+        isGuest: false,
       );
 
-      // Guardar en Firestore
-      await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .set(userModel.toMap());
-
+      await _firestore.collection('users').doc(user.uid).set(userModel.toMap());
       _userModel = userModel;
       notifyListeners();
     } catch (e) {
@@ -129,14 +164,10 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> _updateLastLogin(String uid) async {
     try {
-      await _firestore
-          .collection('users')
-          .doc(uid)
-          .update({
+      await _firestore.collection('users').doc(uid).update({
         'lastLoginAt': Timestamp.fromDate(DateTime.now()),
       });
     } catch (e) {
-      // Error no crítico, solo logging
       print('Error al actualizar último login: $e');
     }
   }
@@ -144,7 +175,6 @@ class AuthProvider extends ChangeNotifier {
   Future<void> signOut() async {
     try {
       _setLoading(true);
-      // Solo cerrar sesión con Firebase para simplificar y reducir puntos de fallo
       await _auth.signOut();
       _userModel = null;
       _setLoading(false);
@@ -172,12 +202,8 @@ class AuthProvider extends ChangeNotifier {
       if (grade != null) updates['grade'] = grade;
       if (avatar != null) updates['avatar'] = avatar;
 
-      await _firestore
-          .collection('users')
-          .doc(_userModel!.id)
-          .update(updates);
+      await _firestore.collection('users').doc(_userModel!.id).update(updates);
 
-      // Actualizar modelo local
       _userModel = _userModel!.copyWith(
         name: name ?? _userModel!.name,
         age: age ?? _userModel!.age,
