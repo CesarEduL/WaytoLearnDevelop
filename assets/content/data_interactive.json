@@ -1,0 +1,200 @@
+{
+  "subjects": [
+    {
+      "id": "mathematics",
+      "name": "Matemática",
+      "sessions": [
+        {
+          "id": "math_s1",
+          "title": "Sesión 1",
+          "stories": [
+            {
+              "id": "math_s1_st1",
+              "title": "El Bosque de los Números",
+              "image": "assets/images/math_story_1.png",
+              "interactive": true,
+              "nodes": [
+                {
+                  "id": "start",
+                  "text": "Hola explorador! Hoy vamos a aprender a contar en el bosque mágico. ¿Qué camino quieres tomar?",
+                  "image": "assets/images/forest_start.png",
+                  "options": [
+                    {
+                      "text": "Camino de las Setas",
+                      "next_node_id": "mushrooms"
+                    },
+                    {
+                      "text": "Camino del Río",
+                      "next_node_id": "river"
+                    }
+                  ]
+                },
+                {
+                  "id": "mushrooms",
+                  "text": "¡Mira cuántas setas! Vamos a contarlas. Hay 3 setas rojas y 2 azules. ¿Cuántas hay en total?",
+                  "image": "assets/images/mushrooms.png",
+                  "options": [
+                    {
+                      "text": "5 setas",
+                      "next_node_id": "correct_sum"
+                    },
+                    {
+                      "text": "4 setas",
+                      "next_node_id": "wrong_sum"
+                    }
+                  ]
+                },
+                {
+                  "id": "river",
+                  "text": "El río es muy bonito. Ves 2 patos nadando y llegan 2 más. ¿Cuántos patos hay ahora?",
+                  "image": "assets/images/river.png",
+                  "options": [
+                    {
+                      "text": "4 patos",
+                      "next_node_id": "correct_sum"
+                    },
+                    {
+                      "text": "3 patos",
+                      "next_node_id": "wrong_sum"
+                    }
+                  ]
+                },
+                {
+                  "id": "correct_sum",
+                  "text": "¡Excelente! Has contado muy bien. ¡Sigamos explorando!",
+                  "image": "assets/images/success.png",
+                  "options": [
+                    {
+                      "text": "Terminar aventura",
+                      "next_node_id": "end"
+                    }
+                  ]
+                },
+                {
+                  "id": "wrong_sum",
+                  "text": "Mmm, inténtalo de nuevo. Cuenta con cuidado.",
+                  "image": "assets/images/retry.png",
+                  "options": [
+                    {
+                      "text": "Volver a intentar",
+                      "next_node_id": "start"
+                    }
+                  ]
+                },
+                {
+                  "id": "end",
+                  "text": "¡Felicidades! Completaste el cuento.",
+                  "image": "assets/images/finish.png",
+                  "options": []
+                }
+              ]
+            },
+            {
+              "id": "math_s1_st2",
+              "title": "Sumando Manzanas",
+              "image": "assets/images/math_story_2.png",
+              "interactive": true,
+              "nodes": [
+                {
+                  "id": "start",
+                  "text": "Vamos a recolectar manzanas.",
+                  "image": "assets/images/apple_tree.png",
+                  "options": [
+                    {
+                      "text": "Empezar",
+                      "next_node_id": "end"
+                    }
+                  ]
+                },
+                {
+                  "id": "end",
+                  "text": "Fin del cuento 2.",
+                  "image": "assets/images/finish.png",
+                  "options": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "math_s2",
+          "title": "Sesión 2",
+          "stories": []
+        },
+        {
+          "id": "math_s3",
+          "title": "Sesión 3",
+          "stories": []
+        },
+        {
+          "id": "math_s4",
+          "title": "Sesión 4",
+          "stories": []
+        }
+      ]
+    },
+    {
+      "id": "communication",
+      "name": "Comunicación",
+      "sessions": [
+        {
+          "id": "com_s1",
+          "title": "Sesión 1",
+          "stories": [
+             {
+              "id": "com_s1_st1",
+              "title": "El Loro Parlanchín",
+              "image": "assets/images/parrot.png",
+              "interactive": true,
+              "nodes": [
+                {
+                  "id": "start",
+                  "text": "Había un loro que hablaba mucho.",
+                  "image": "assets/images/parrot_start.png",
+                  "options": [
+                    {
+                      "text": "Saludar al loro",
+                      "next_node_id": "greet"
+                    }
+                  ]
+                },
+                {
+                  "id": "greet",
+                  "text": "El loro dice: ¡Hola amigo!",
+                  "image": "assets/images/parrot_hello.png",
+                  "options": [
+                     {
+                      "text": "Fin",
+                      "next_node_id": "end"
+                    }
+                  ]
+                },
+                {
+                  "id": "end",
+                  "text": "Fin del cuento.",
+                  "image": "assets/images/finish.png",
+                  "options": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "com_s2",
+          "title": "Sesión 2",
+          "stories": []
+        },
+        {
+          "id": "com_s3",
+          "title": "Sesión 3",
+          "stories": []
+        },
+        {
+          "id": "com_s4",
+          "title": "Sesión 4",
+          "stories": []
+        }
+      ]
+    }
+  ]
+}

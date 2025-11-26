@@ -17,7 +17,9 @@ class UserModel {
   final Map<String, dynamic> progress;
   final DateTime createdAt;
   final DateTime lastLoginAt;
-  final bool isGuest; // <-- Nuevo campo
+  final bool isGuest;
+  final int streak; // <-- Días consecutivos
+  final DateTime? lastLearningDate; // <-- Última vez que completó una actividad
 
   UserModel({
     required this.id,
@@ -36,7 +38,9 @@ class UserModel {
     this.progress = const {},
     required this.createdAt,
     required this.lastLoginAt,
-    this.isGuest = false, // <-- Valor por defecto
+    this.isGuest = false,
+    this.streak = 0,
+    this.lastLearningDate,
   });
 
   factory UserModel.fromMap(Map<String, dynamic> map, String id) {
@@ -58,7 +62,11 @@ class UserModel {
       progress: Map<String, dynamic>.from(map['progress'] ?? {}),
       createdAt: (map['createdAt'] as Timestamp).toDate(),
       lastLoginAt: (map['lastLoginAt'] as Timestamp).toDate(),
-      isGuest: map['isGuest'] ?? false, // <-- Leer desde Firestore
+      isGuest: map['isGuest'] ?? false,
+      streak: map['streak'] ?? 0,
+      lastLearningDate: map['lastLearningDate'] != null 
+          ? (map['lastLearningDate'] as Timestamp).toDate() 
+          : null,
     );
   }
 
@@ -79,7 +87,9 @@ class UserModel {
       'progress': progress,
       'createdAt': Timestamp.fromDate(createdAt),
       'lastLoginAt': Timestamp.fromDate(lastLoginAt),
-      'isGuest': isGuest, // <-- Guardar en Firestore
+      'isGuest': isGuest,
+      'streak': streak,
+      'lastLearningDate': lastLearningDate != null ? Timestamp.fromDate(lastLearningDate!) : null,
     };
   }
 
@@ -100,7 +110,9 @@ class UserModel {
     Map<String, dynamic>? progress,
     DateTime? createdAt,
     DateTime? lastLoginAt,
-    bool? isGuest, // <-- Nuevo parámetro
+    bool? isGuest,
+    int? streak,
+    DateTime? lastLearningDate,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -119,7 +131,9 @@ class UserModel {
       progress: progress ?? this.progress,
       createdAt: createdAt ?? this.createdAt,
       lastLoginAt: lastLoginAt ?? this.lastLoginAt,
-      isGuest: isGuest ?? this.isGuest, // <-- Mantener valor
+      isGuest: isGuest ?? this.isGuest,
+      streak: streak ?? this.streak,
+      lastLearningDate: lastLearningDate ?? this.lastLearningDate,
     );
   }
 

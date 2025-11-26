@@ -7,6 +7,8 @@ import 'core/services/user_service.dart';
 import 'core/services/session_service.dart';
 import 'core/providers/game_provider.dart';
 import 'core/services/story_service.dart';
+import 'core/services/content_service.dart';
+import 'core/services/progress_service.dart';
 import 'core/providers/user_provider.dart';
 import 'core/providers/story_exercise_provider.dart';
 import 'core/providers/math_exercise_provider.dart';
@@ -43,6 +45,8 @@ class WaytoLearnApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => MathExerciseProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => SessionService()),
+        ChangeNotifierProvider(create: (_) => ContentService()),
+        ChangeNotifierProvider(create: (_) => ProgressService()),
       ],
       child: MaterialApp(
         title: 'WaytoLearn',

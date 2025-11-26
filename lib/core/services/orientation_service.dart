@@ -67,4 +67,14 @@ class OrientationService {
     // Cambiar automáticamente a landscape
     await setLandscapeOnlyWithDelay();
   }
+
+  /// Permite que la aplicación rote libremente según el dispositivo
+  Future<void> enableAutoOrientation() async {
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+  }
 }

@@ -6,12 +6,14 @@ class StoryPathWidget extends StatefulWidget {
   final int completedStoryIndex; // Índice del último cuento completado (0-6)
   final Function(int)? onStoryTap;
   final double scale;
+  final Widget Function(int index, bool isCompleted, bool isLocked)? storyIconBuilder;
 
   const StoryPathWidget({
     super.key,
     this.completedStoryIndex = -1, // -1 = ninguno completado
     this.onStoryTap,
     this.scale = 1.0,
+    this.storyIconBuilder,
   });
 
   @override
@@ -117,6 +119,7 @@ class _StoryPathWidgetState extends State<StoryPathWidget> {
                     }
                   },
                   scale: widget.scale,
+                  customIcon: widget.storyIconBuilder?.call(index, index <= widget.completedStoryIndex, isLocked),
                 ),
               );
             }),

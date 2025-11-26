@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'package:waytolearn/core/models/interactive_story_model.dart';
+import 'package:waytolearn/core/services/content_service.dart';
+import 'package:waytolearn/core/services/progress_service.dart';
+import 'package:waytolearn/core/services/user_service.dart';
 import 'package:waytolearn/core/services/orientation_service.dart';
 import 'package:waytolearn/presentation/screens/communication/comm_index_screen_sessions.dart';
 import 'package:waytolearn/presentation/screens/mathematics/bear_progress_map_screen.dart';
@@ -7,7 +12,7 @@ import 'package:waytolearn/presentation/screens/main/dashboard_screen.dart';
 import 'package:waytolearn/presentation/widgets/mathematics/home_icon_button.dart';
 import 'package:waytolearn/presentation/widgets/mathematics/communication_switch_button.dart';
 import 'package:waytolearn/presentation/widgets/mathematics/progress_banner.dart';
-import 'package:waytolearn/presentation/widgets/communication/session_box_widget.dart'; // Reutilizando el widget mejorado
+import 'package:waytolearn/presentation/widgets/communication/session_box_widget.dart';
 import 'package:waytolearn/presentation/widgets/mathematics/mathematics_bottom_bot.dart';
 
 class MathIndexScreenSessions extends StatefulWidget {
@@ -17,53 +22,43 @@ class MathIndexScreenSessions extends StatefulWidget {
   State<MathIndexScreenSessions> createState() => _MathIndexScreenSessionsState();
 }
 
-class _MathIndexScreenSessionsState extends State<MathIndexScreenSessions> {
-  String _currentSession = 'Sesión 1'; // Variable para mostrar la sesión actual
-  String _sessionName = 'Nombre de la Sesión'; // Variable para mostrar el nombre de la sesión
-  double _subjectProgress = 0.5; // Variable para el progreso de la materia (0.0 a 1.0)
-  String _subjectName = 'Matemática'; // Variable para el nombre de la materia
+class _MathIndexScreenSessionsState extends State<MathIndexScreenSessions> with TickerProviderStateMixin {
+  // GlobalKeys para detectar posición de cada widget (para hover)
+  final List<GlobalKey> _sessionKeys = List.generate(4, (_) => GlobalKey());
   
-  // Variables para Sesión 1
-  String _session1Number = 'Sesión 1';
-  String _session1Theme = 'Números y Conteo';
-  double _session1Progress = 1; // 0.0 a 1.0
-  
-  // Variables para Sesión 2
-  String _session2Number = 'Sesión 2';
-  String _session2Theme = 'Operaciones básicas';
-  double _session2Progress = 0.45; // 45%
-  
-  // Variables para Sesión 3
-  String _session3Number = 'Sesión 3';
-  String _session3Theme = 'Formas y figuras';
-  double _session3Progress = 0.0; // 0%
-  
-  // Variables para Sesión 4
-  String _session4Number = 'Sesión 4';
-  String _session4Theme = 'Medidas y comparaciones';
-  double _session4Progress = 0.0; // 0%
-
-  // GlobalKeys para detectar posición de cada widget
-  final GlobalKey _session1Key = GlobalKey();
-  final GlobalKey _session2Key = GlobalKey();
-  final GlobalKey _session3Key = GlobalKey();
-  final GlobalKey _session4Key = GlobalKey();
-
   // Estados de hover
-  bool _session1Hovered = false;
-  bool _session2Hovered = false;
-  bool _session3Hovered = false;
-  bool _session4Hovered = false;
+  List<bool> _sessionHovers = List.generate(4, (_) => false);
+
+  late AnimationController _entryController;
+  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
+    
+    _entryController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _fadeAnimation = CurvedAnimation(parent: _entryController, curve: Curves.easeOut);
+    
+    _entryController.forward();
+
+    // Cargar progreso al iniciar
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userService = Provider.of<UserService>(context, listen: false);
+      final userId = userService.currentUser?.id;
+      if (userId != null) {
+        Provider.of<ProgressService>(context, listen: false).loadProgress(userId, 'math');
+      }
+    });
   }
 
   @override
   void dispose() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    _entryController.dispose();
     super.dispose();
   }
 
@@ -74,173 +69,181 @@ class _MathIndexScreenSessionsState extends State<MathIndexScreenSessions> {
     final scale = mediaSize.width / designWidth;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFE8F5E9), // Fondo verde muy suave
+      backgroundColor: const Color(0xFFE8F5E9),
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // --- Fondo Decorativo ---
+          // --- Fondo Decorativo Premium ---
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Color(0xFFE0F2F1), // Teal muy suave
-                  Color(0xFFE8F5E9), // Verde muy suave
-                  Color(0xFFFFFDE7), // Amarillo muy suave
+                  Color(0xFFB2DFDB), // Teal 200
+                  Color(0xFFE0F2F1), // Teal 50
+                  Color(0xFFFFF9C4), // Yellow 100
                 ],
+                stops: [0.0, 0.5, 1.0],
               ),
             ),
           ),
           
-          // Elementos flotantes (Figuras Geométricas para Matemáticas)
+          // Elementos flotantes animados (simplificados estáticos por ahora, pero con mejor color)
           Positioned(
             top: 40 * scale,
             right: 80 * scale,
-            child: Icon(Icons.change_history, color: Colors.blue.withOpacity(0.2), size: 100 * scale), // Triángulo
+            child: Icon(Icons.change_history, color: Colors.indigo.withOpacity(0.1), size: 100 * scale),
           ),
           Positioned(
             bottom: 60 * scale,
             left: 40 * scale,
-            child: Icon(Icons.crop_square, color: Colors.green.withOpacity(0.2), size: 120 * scale), // Cuadrado
+            child: Icon(Icons.crop_square, color: Colors.teal.withOpacity(0.1), size: 120 * scale),
           ),
           Positioned(
             top: 150 * scale,
             left: 220 * scale,
-            child: Icon(Icons.circle_outlined, color: Colors.orange.withOpacity(0.2), size: 50 * scale), // Círculo
-          ),
-          Positioned(
-            bottom: 100 * scale,
-            right: 200 * scale,
-            child: Icon(Icons.star_border_rounded, color: Colors.purple.withOpacity(0.2), size: 60 * scale), // Estrella
+            child: Icon(Icons.circle_outlined, color: Colors.orange.withOpacity(0.1), size: 50 * scale),
           ),
 
-          Listener(
-            behavior: HitTestBehavior.deferToChild,
-            onPointerMove: (event) => _handlePointerMove(event.position),
-            onPointerUp: (_) => _resetAllHovers(),
-            onPointerCancel: (_) => _resetAllHovers(),
-            child: Stack(
-              fit: StackFit.expand,
-              clipBehavior: Clip.none,
-              children: [
+          // Contenido Principal con StreamBuilder para datos reales
+          StreamBuilder<List<SubjectModel>>(
+            stream: Provider.of<ContentService>(context, listen: false).getSubjects(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-          Positioned(
-              top: -32,
-              left: -17,
-              child: HomeIconButton(
-                onPressed: _goToDashboard,
-              ),
-            ),
-            Positioned(
-              top: 14 * scale,
-              left: 806 * scale,
-              child: CommunicationSwitchButton(
-                onTap: _openCommunication,
-                scale: scale,
-              ),
-            ),
-            Positioned(
-              top: 105 * scale,
-              left: 17 * scale,
-              child: ProgressBanner(
-                currentSession: _currentSession,
-                sessionName: _sessionName,
-                subjectProgress: _subjectProgress,
-                subjectName: _subjectName,
-                scale: scale,
-              ),
-            ),
-            // Sesión 1 - Verde Esmeralda
-            Positioned(
-              top: 245 * scale,
-              left: 17 * scale,
-              child: SessionBoxWidget(
-                key: _session1Key,
-                scale: scale,
-                sessionNumber: _session1Number,
-                sessionTheme: _session1Theme,
-                progress: _session1Progress,
-                isHovered: _session1Hovered,
-                backgroundColor: const Color(0xFF4DB6AC), // Teal 300
-                sessionNumberColor: const Color(0xFF004D40),
-                sessionThemeColor: Colors.white,
-                progressBarColor1: const Color(0xFF80CBC4),
-                progressBarColor2: const Color(0xFF26A69A),
-                percentageColor: Colors.white,
-                onTap: () => _openBearProgressMap(),
-              ),
-            ),
-            // Sesión 2 - Azul Cielo
-            Positioned(
-              top: 245 * scale,
-              left: 237 * scale,
-              child: SessionBoxWidget(
-                key: _session2Key,
-                scale: scale,
-                sessionNumber: _session2Number,
-                sessionTheme: _session2Theme,
-                progress: _session2Progress,
-                isHovered: _session2Hovered,
-                backgroundColor: const Color(0xFF4FC3F7), // Light Blue 300
-                sessionNumberColor: const Color(0xFF01579B),
-                sessionThemeColor: Colors.white,
-                progressBarColor1: const Color(0xFF81D4FA),
-                progressBarColor2: const Color(0xFF29B6F6),
-                percentageColor: Colors.white,
-                onTap: () => _openBearProgressMap(),
-              ),
-            ),
-            // Sesión 3 - Indigo
-            Positioned(
-              top: 245 * scale,
-              left: 457 * scale,
-              child: SessionBoxWidget(
-                key: _session3Key,
-                scale: scale,
-                sessionNumber: _session3Number,
-                sessionTheme: _session3Theme,
-                progress: _session3Progress,
-                isHovered: _session3Hovered,
-                backgroundColor: const Color(0xFF7986CB), // Indigo 300
-                sessionNumberColor: const Color(0xFF1A237E),
-                sessionThemeColor: Colors.white,
-                progressBarColor1: const Color(0xFF9FA8DA),
-                progressBarColor2: const Color(0xFF5C6BC0),
-                percentageColor: Colors.white,
-                onTap: () => _openBearProgressMap(),
-              ),
-            ),
-            // Sesión 4 - Lima/Verde Claro
-            Positioned(
-              top: 245 * scale,
-              left: 677 * scale,
-              child: SessionBoxWidget(
-                key: _session4Key,
-                scale: scale,
-                sessionNumber: _session4Number,
-                sessionTheme: _session4Theme,
-                progress: _session4Progress,
-                isHovered: _session4Hovered,
-                backgroundColor: const Color(0xFFDCE775), // Lime 300
-                sessionNumberColor: const Color(0xFF827717),
-                sessionThemeColor: const Color(0xFF33691E), // Texto oscuro para contraste
-                progressBarColor1: const Color(0xFFE6EE9C),
-                progressBarColor2: const Color(0xFFC0CA33),
-                percentageColor: const Color(0xFF33691E),
-                onTap: () => _openBearProgressMap(),
-              ),
-            ),
+              final subjects = snapshot.data!;
+              final mathSubject = subjects.firstWhere(
+                (s) => s.id == 'math', 
+                orElse: () => SubjectModel(id: 'math', name: 'Matemática', sessions: [])
+              );
 
-              ],
-            ),
+              return Consumer<ProgressService>(
+                builder: (context, progressService, child) {
+                  // Calcular progreso general de la materia
+                  int totalStoriesSubject = 0;
+                  int completedStoriesSubject = 0;
+
+                  for (var session in mathSubject.sessions) {
+                    totalStoriesSubject += session.stories.length;
+                    for (var story in session.stories) {
+                      if (progressService.isStoryCompleted(story.id)) {
+                        completedStoriesSubject++;
+                      }
+                    }
+                  }
+
+                  double subjectProgress = totalStoriesSubject > 0 
+                      ? completedStoriesSubject / totalStoriesSubject 
+                      : 0.0;
+
+                  // Sesión actual (la primera incompleta o la última)
+                  String currentSessionName = 'Sesión 1';
+                  String currentSessionTitle = 'Inicio';
+                  
+                  for (var session in mathSubject.sessions) {
+                    bool isSessionComplete = session.stories.every((s) => progressService.isStoryCompleted(s.id));
+                    if (!isSessionComplete) {
+                      currentSessionName = session.name; // Asumiendo que name es "Sesión X"
+                      // FIX: session.name instead of session.title
+                      currentSessionTitle = session.name.isNotEmpty ? session.name : 'Aprendizaje';
+                      break;
+                    }
+                  }
+
+                  return FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: Listener(
+                      behavior: HitTestBehavior.deferToChild,
+                      onPointerMove: (event) => _handlePointerMove(event.position),
+                      onPointerUp: (_) => _resetAllHovers(),
+                      onPointerCancel: (_) => _resetAllHovers(),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        clipBehavior: Clip.none,
+                        children: [
+                          Positioned(
+                            top: -32,
+                            left: -17,
+                            child: HomeIconButton(onPressed: _goToDashboard),
+                          ),
+                          Positioned(
+                            top: 14 * scale,
+                            left: 806 * scale,
+                            child: CommunicationSwitchButton(
+                              onTap: _openCommunication,
+                              scale: scale,
+                            ),
+                          ),
+                          
+                          // Banner de Progreso General
+                          Positioned(
+                            top: 105 * scale,
+                            left: 17 * scale,
+                            child: ProgressBanner(
+                              currentSession: currentSessionName,
+                              sessionName: currentSessionTitle,
+                              subjectProgress: subjectProgress,
+                              subjectName: mathSubject.name,
+                              scale: scale,
+                            ),
+                          ),
+
+                          // Tarjetas de Sesiones (Mapeadas dinámicamente hasta 4)
+                          ...List.generate(4, (index) {
+                            if (index >= mathSubject.sessions.length) return const SizedBox.shrink();
+                            
+                            final session = mathSubject.sessions[index];
+                            
+                            // Calcular progreso de la sesión
+                            int totalStories = session.stories.length;
+                            int completedStories = session.stories.where((s) => progressService.isStoryCompleted(s.id)).length;
+                            double sessionProgress = totalStories > 0 ? completedStories / totalStories : 0.0;
+
+                            // Posiciones fijas según el diseño original
+                            final double leftPos = 17 * scale + (index * 220 * scale);
+                            
+                            // Colores por índice para mantener el diseño visual
+                            final colors = _getSessionColors(index);
+
+                            return Positioned(
+                              top: 245 * scale,
+                              left: leftPos,
+                              child: SessionBoxWidget(
+                                key: _sessionKeys[index],
+                                scale: scale,
+                                sessionNumber: 'Sesión ${index + 1}',
+                                // FIX: session.name instead of session.title
+                                sessionTheme: session.name.isNotEmpty ? session.name : 'Tema ${index + 1}',
+                                progress: sessionProgress,
+                                isHovered: _sessionHovers[index],
+                                backgroundColor: colors['bg']!,
+                                sessionNumberColor: colors['number']!,
+                                sessionThemeColor: colors['theme']!,
+                                progressBarColor1: colors['bar1']!,
+                                progressBarColor2: colors['bar2']!,
+                                percentageColor: colors['percent']!,
+                                onTap: () => _openBearProgressMap(),
+                              ),
+                            );
+                          }),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
           ),
+
           // Bot de matemáticas
           Positioned(
-            top: 345 * (MediaQuery.of(context).size.width / 912.0),
-            left: 830 * (MediaQuery.of(context).size.width / 912.0),
+            top: 345 * scale,
+            left: 830 * scale,
             child: MathematicsBottomBot(
-              scale: MediaQuery.of(context).size.width / 912.0,
+              scale: scale,
               onTap: _refreshScreen,
             ),
           ),
@@ -249,39 +252,77 @@ class _MathIndexScreenSessionsState extends State<MathIndexScreenSessions> {
     );
   }
 
-  void _handlePointerMove(Offset globalPosition) {
-    bool session1Inside = _isPointerInside(_session1Key, globalPosition);
-    bool session2Inside = _isPointerInside(_session2Key, globalPosition);
-    bool session3Inside = _isPointerInside(_session3Key, globalPosition);
-    bool session4Inside = _isPointerInside(_session4Key, globalPosition);
+  Map<String, Color> _getSessionColors(int index) {
+    switch (index) {
+      case 0: // Verde Esmeralda
+        return {
+          'bg': const Color(0xFF4DB6AC),
+          'number': const Color(0xFF004D40),
+          'theme': Colors.white,
+          'bar1': const Color(0xFF80CBC4),
+          'bar2': const Color(0xFF26A69A),
+          'percent': Colors.white,
+        };
+      case 1: // Azul Cielo
+        return {
+          'bg': const Color(0xFF4FC3F7),
+          'number': const Color(0xFF01579B),
+          'theme': Colors.white,
+          'bar1': const Color(0xFF81D4FA),
+          'bar2': const Color(0xFF29B6F6),
+          'percent': Colors.white,
+        };
+      case 2: // Indigo
+        return {
+          'bg': const Color(0xFF7986CB),
+          'number': const Color(0xFF1A237E),
+          'theme': Colors.white,
+          'bar1': const Color(0xFF9FA8DA),
+          'bar2': const Color(0xFF5C6BC0),
+          'percent': Colors.white,
+        };
+      case 3: // Lima
+        return {
+          'bg': const Color(0xFFDCE775),
+          'number': const Color(0xFF827717),
+          'theme': const Color(0xFF33691E),
+          'bar1': const Color(0xFFE6EE9C),
+          'bar2': const Color(0xFFC0CA33),
+          'percent': const Color(0xFF33691E),
+        };
+      default:
+        return {
+          'bg': Colors.grey,
+          'number': Colors.black,
+          'theme': Colors.white,
+          'bar1': Colors.grey[300]!,
+          'bar2': Colors.grey[600]!,
+          'percent': Colors.white,
+        };
+    }
+  }
 
-    if (_session1Hovered != session1Inside ||
-        _session2Hovered != session2Inside ||
-        _session3Hovered != session3Inside ||
-        _session4Hovered != session4Inside) {
-      setState(() {
-        _session1Hovered = session1Inside;
-        _session2Hovered = session2Inside;
-        _session3Hovered = session3Inside;
-        _session4Hovered = session4Inside;
-      });
+  void _handlePointerMove(Offset globalPosition) {
+    for (int i = 0; i < 4; i++) {
+      bool isInside = _isPointerInside(_sessionKeys[i], globalPosition);
+      if (_sessionHovers[i] != isInside) {
+        setState(() {
+          _sessionHovers[i] = isInside;
+        });
+      }
     }
   }
 
   bool _isPointerInside(GlobalKey key, Offset globalPosition) {
     final RenderBox? box = key.currentContext?.findRenderObject() as RenderBox?;
     if (box == null) return false;
-
     final Offset localPosition = box.globalToLocal(globalPosition);
     return box.paintBounds.contains(localPosition);
   }
 
   void _resetAllHovers() {
     setState(() {
-      _session1Hovered = false;
-      _session2Hovered = false;
-      _session3Hovered = false;
-      _session4Hovered = false;
+      _sessionHovers = List.filled(4, false);
     });
   }
 
@@ -300,9 +341,7 @@ class _MathIndexScreenSessionsState extends State<MathIndexScreenSessions> {
     if (!mounted) return;
     await Navigator.pushReplacement(
       context,
-      MaterialPageRoute(
-        builder: (_) => const DashboardScreen(),
-      ),
+      MaterialPageRoute(builder: (_) => const DashboardScreen()),
     );
   }
 
@@ -311,9 +350,7 @@ class _MathIndexScreenSessionsState extends State<MathIndexScreenSessions> {
     if (!mounted) return;
     await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => const CommIndexScreenSessions(),
-      ),
+      MaterialPageRoute(builder: (_) => const CommIndexScreenSessions()),
     );
   }
 
@@ -321,9 +358,7 @@ class _MathIndexScreenSessionsState extends State<MathIndexScreenSessions> {
     if (!mounted) return;
     await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => const BearProgressMapScreen(),
-      ),
+      MaterialPageRoute(builder: (_) => const BearProgressMapScreen()),
     );
   }
 }

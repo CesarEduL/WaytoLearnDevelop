@@ -6,7 +6,7 @@ import '../../../core/models/session_model.dart';
 import '../../../core/theme/child_colors.dart';
 import '../../../core/theme/child_text_styles.dart';
 import '../../../core/widgets/modern_child_card.dart';
-import 'bear_progress_map_screen.dart';
+import 'progress_map_screen.dart';
 
 /// Pantalla de selección de sesiones para Comunicación
 class CommunicationSessionsScreen extends StatefulWidget {
@@ -298,7 +298,7 @@ class _CommunicationSessionsScreenState extends State<CommunicationSessionsScree
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => BearProgressMapScreen(sessionId: session.id),
+        builder: (_) => ProgressMapScreen(sessionNumber: session.order),
       ),
     );
   }

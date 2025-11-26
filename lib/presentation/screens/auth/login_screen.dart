@@ -4,6 +4,7 @@ import '../../../core/services/user_service.dart';
 import '../../../core/services/orientation_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/orientation_aware_widget.dart';
+import '../../../core/widgets/responsive_layout.dart';
 import '../main/dashboard_screen.dart';
 import 'login_buttons.dart';
 import 'welcome_section.dart';
@@ -31,8 +32,8 @@ class _LoginScreenState extends State<LoginScreen>
     super.initState();
     _initializeAnimations();
     _startAnimations();
-    // Forzar orientación vertical para login
-    OrientationService().setPortraitOnly();
+    // Permitir rotación automática
+    OrientationService().enableAutoOrientation();
   }
 
   void _initializeAnimations() {
@@ -81,97 +82,90 @@ class _LoginScreenState extends State<LoginScreen>
       ],
     );
 
-    return OrientationAwareWidget(
-      child: Scaffold(
-        body: Container(
-          decoration: const BoxDecoration(gradient: backgroundGradient),
-          child: SafeArea(
-            child: Stack(
-              children: [
-                _buildBackgroundParticles(),
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final screenWidth = constraints.maxWidth;
-
-                    if (screenWidth < 600) {
-                      return SingleChildScrollView(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          children: [
-                            FadeTransition(
-                              opacity: _fadeAnimation,
-                              child:
-                                  WelcomeSection(bearAnimation: _bearAnimation),
-                            ),
-                            const SizedBox(height: 40),
-                            SlideTransition(
-                              position: _slideAnimation,
-                              child: FadeTransition(
-                                opacity: _fadeAnimation,
-                                child: LoginButtons(
-                                  onGoogleSignIn: () =>
-                                      _handleGoogleSignIn(context),
-                                  onGuestSignIn: () =>
-                                      _handleGuestSignIn(context),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-
-                    return Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            flex: 1,
-                            child: FadeTransition(
-                              opacity: _fadeAnimation,
-                              child:
-                                  WelcomeSection(bearAnimation: _bearAnimation),
-                            ),
-                          ),
-                          Container(
-                            width: 2,
-                            margin: const EdgeInsets.symmetric(horizontal: 32),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                                  Colors.white.withOpacity(0.3),
-                                  Colors.white.withOpacity(0.1),
-                                  Colors.white.withOpacity(0.3),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 1,
-                            child: SlideTransition(
-                              position: _slideAnimation,
-                              child: FadeTransition(
-                                opacity: _fadeAnimation,
-                                child: LoginButtons(
-                                  onGoogleSignIn: () =>
-                                      _handleGoogleSignIn(context),
-                                  onGuestSignIn: () =>
-                                      _handleGuestSignIn(context),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(gradient: backgroundGradient),
+        child: SafeArea(
+          child: Stack(
+            children: [
+              _buildBackgroundParticles(),
+              ResponsiveLayout(
+                mobileBody: _buildVerticalLayout(),
+                desktopBody: _buildHorizontalLayout(),
+              ),
+            ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildVerticalLayout() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        children: [
+          FadeTransition(
+            opacity: _fadeAnimation,
+            child: WelcomeSection(bearAnimation: _bearAnimation),
+          ),
+          const SizedBox(height: 40),
+          SlideTransition(
+            position: _slideAnimation,
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: LoginButtons(
+                onGoogleSignIn: () => _handleGoogleSignIn(context),
+                onGuestSignIn: () => _handleGuestSignIn(context),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHorizontalLayout() {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 1,
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: WelcomeSection(bearAnimation: _bearAnimation),
+            ),
+          ),
+          Container(
+            width: 2,
+            margin: const EdgeInsets.symmetric(horizontal: 32),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.white.withOpacity(0.3),
+                  Colors.white.withOpacity(0.1),
+                  Colors.white.withOpacity(0.3),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: SlideTransition(
+              position: _slideAnimation,
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: LoginButtons(
+                  onGoogleSignIn: () => _handleGoogleSignIn(context),
+                  onGuestSignIn: () => _handleGuestSignIn(context),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -186,7 +180,7 @@ class _LoginScreenState extends State<LoginScreen>
       final success = await userService.signInWithGoogle();
 
       if (success && mounted) {
-        await OrientationService().setLandscapeOnly();
+        // No forzamos landscape, dejamos que Dashboard se adapte
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const DashboardScreen()),
         );
@@ -214,7 +208,7 @@ class _LoginScreenState extends State<LoginScreen>
       final success = await userService.signInAsGuest();
 
       if (success && mounted) {
-        await OrientationService().setLandscapeOnly();
+        // No forzamos landscape, dejamos que Dashboard se adapte
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const DashboardScreen()),
         );

@@ -7,6 +7,7 @@ import '../../../core/theme/child_text_styles.dart';
 import '../../../core/widgets/child_header.dart';
 import '../../../core/widgets/modern_child_card.dart';
 import '../../../core/widgets/orientation_aware_widget.dart';
+import '../../../core/widgets/responsive_layout.dart';
 import '../auth/login_screen.dart';
 import '../profile/profile_screen.dart';
 import '../profile/progress_reports_screen.dart';
@@ -25,7 +26,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    OrientationService().setLandscapeOnly();
+    // Permitir rotación automática
+    OrientationService().enableAutoOrientation();
   }
 
   Future<void> _handleLogout(BuildContext context) async {
@@ -72,12 +74,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final userService = Provider.of<UserService>(context);
     final childName = userService.currentUser?.name ?? 'Amiguito';
 
-    return OrientationAwareWidget(
-      forceLandscape: true,
-      child: Scaffold(
-        backgroundColor: ChildColors.background,
-        drawer: _buildDrawer(context),
-        body: Column(
+    return Scaffold(
+      backgroundColor: ChildColors.background,
+      drawer: _buildDrawer(context),
+      body: SafeArea(
+        child: Column(
           children: [
             // Header con nombre del niño y logout
             ChildHeader(
@@ -85,64 +86,146 @@ class _DashboardScreenState extends State<DashboardScreen> {
               onLogout: () => _handleLogout(context),
             ),
             
-            // Contenido principal
+            // Contenido principal responsivo
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Título de bienvenida
-                    Text(
-                      '¿Qué quieres aprender hoy?',
-                      style: ChildTextStyles.title.copyWith(
-                        color: ChildColors.purpleMagic,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    
-                    // Grid de categorías
-                    Row(
-                      children: [
-                        // Comunicación
-                        Expanded(
-                          child: _buildCategoryCard(
-                            context: context,
-                            title: 'Comunicación',
-                            icon: Icons.menu_book,
-                            gradient: ChildColors.blueGradient,
-                            onTap: () => _navigateToSubject(context, 'communication'),
-                          ),
-                        ),
-                        const SizedBox(width: 20),
-                        // Matemáticas
-                        Expanded(
-                          child: _buildCategoryCard(
-                            context: context,
-                            title: 'Matemáticas',
-                            icon: Icons.calculate,
-                            gradient: ChildColors.greenGradient,
-                            onTap: () => _navigateToSubject(context, 'math'),
-                          ),
-                        ),
-                      ],
-                    ),
-                    
-                    const SizedBox(height: 24),
-                    
-                    // Tarjeta de Área de Padres
-                    _buildParentsAreaCard(context, userService),
-                    
-                    const SizedBox(height: 24),
-                    
-                    // Sección de progreso
-                    _buildProgressSection(),
-                  ],
-                ),
+              child: ResponsiveLayout(
+                mobileBody: _buildVerticalLayout(context, userService),
+                desktopBody: _buildHorizontalLayout(context, userService),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildVerticalLayout(BuildContext context, UserService userService) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Título de bienvenida
+          Text(
+            '¿Qué quieres aprender hoy?',
+            style: ChildTextStyles.title.copyWith(
+              color: ChildColors.purpleMagic,
+              fontSize: 24,
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Racha y Nivel
+          _buildStreakSection(userService),
+          const SizedBox(height: 16),
+          _buildLevelSection(userService),
+          const SizedBox(height: 24),
+          
+          // Categorías en lista vertical
+          _buildCategoryCard(
+            context: context,
+            title: 'Comunicación',
+            icon: Icons.menu_book,
+            gradient: ChildColors.blueGradient,
+            onTap: () => _navigateToSubject(context, 'communication'),
+          ),
+          const SizedBox(height: 16),
+          _buildCategoryCard(
+            context: context,
+            title: 'Matemáticas',
+            icon: Icons.calculate,
+            gradient: ChildColors.greenGradient,
+            onTap: () => _navigateToSubject(context, 'math'),
+          ),
+          
+          const SizedBox(height: 24),
+          
+          // Tarjeta de Área de Padres
+          _buildParentsAreaCard(context, userService),
+          
+          const SizedBox(height: 24),
+          
+          // Sección de progreso
+          _buildProgressSection(userService),
+
+          const SizedBox(height: 24),
+
+          // Logros
+          _buildAchievementsSection(userService),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHorizontalLayout(BuildContext context, UserService userService) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Título de bienvenida
+          Text(
+            '¿Qué quieres aprender hoy?',
+            style: ChildTextStyles.title.copyWith(
+              color: ChildColors.purpleMagic,
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Racha y Nivel en fila
+          Row(
+            children: [
+              Expanded(child: _buildStreakSection(userService)),
+              const SizedBox(width: 20),
+              Expanded(child: _buildLevelSection(userService)),
+            ],
+          ),
+          const SizedBox(height: 24),
+          
+          // Grid de categorías
+          Row(
+            children: [
+              // Comunicación
+              Expanded(
+                child: _buildCategoryCard(
+                  context: context,
+                  title: 'Comunicación',
+                  icon: Icons.menu_book,
+                  gradient: ChildColors.blueGradient,
+                  onTap: () => _navigateToSubject(context, 'communication'),
+                ),
+              ),
+              const SizedBox(width: 20),
+              // Matemáticas
+              Expanded(
+                child: _buildCategoryCard(
+                  context: context,
+                  title: 'Matemáticas',
+                  icon: Icons.calculate,
+                  gradient: ChildColors.greenGradient,
+                  onTap: () => _navigateToSubject(context, 'math'),
+                ),
+              ),
+            ],
+          ),
+          
+          const SizedBox(height: 24),
+          
+          // Tarjeta de Área de Padres
+          _buildParentsAreaCard(context, userService),
+          
+          const SizedBox(height: 24),
+          
+          // Sección de progreso y logros
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: _buildProgressSection(userService)),
+              const SizedBox(width: 20),
+              Expanded(child: _buildAchievementsSection(userService)),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -204,7 +287,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildProgressSection() {
+  Widget _buildProgressSection(UserService userService) {
+    final user = userService.currentUser;
+    double commProgress = 0.0;
+    double mathProgress = 0.0;
+
+    if (user != null) {
+      final commUnlocked = user.getHighestUnlockedIndex('communication');
+      commProgress = (commUnlocked / 28.0).clamp(0.0, 1.0);
+
+      final mathUnlocked = user.getHighestUnlockedIndex('mathematics');
+      mathProgress = (mathUnlocked / 28.0).clamp(0.0, 1.0);
+    }
+
     return ModernChildCard(
       color: Colors.white,
       child: Column(
@@ -227,9 +322,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          _buildProgressItem('Comunicación', 0.6, ChildColors.blueSky),
+          _buildProgressItem('Comunicación', commProgress, ChildColors.blueSky),
           const SizedBox(height: 12),
-          _buildProgressItem('Matemáticas', 0.3, ChildColors.greenHappy),
+          _buildProgressItem('Matemáticas', mathProgress, ChildColors.greenHappy),
         ],
       ),
     );
@@ -467,6 +562,187 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       );
     }
+  }
+
+  Widget _buildStreakSection(UserService userService) {
+    final streak = userService.currentUser?.streak ?? 0;
+    
+    return ModernChildCard(
+      gradient: const LinearGradient(
+        colors: [Color(0xFFFF9800), Color(0xFFFF5722)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.3),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.local_fire_department,
+              color: Colors.white,
+              size: 32,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$streak Días',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Text(
+                  '¡Racha de aprendizaje!',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLevelSection(UserService userService) {
+    final user = userService.currentUser;
+    final level = user?.currentLevel ?? 1;
+    final xp = user?.experiencePoints ?? 0;
+    final nextLevelXp = user?.experienceToNextLevel ?? 100;
+    final progress = (xp / nextLevelXp).clamp(0.0, 1.0);
+
+    return ModernChildCard(
+      color: Colors.white,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.star,
+                    color: ChildColors.yellowSun,
+                    size: 32,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Nivel $level',
+                    style: ChildTextStyles.subtitle.copyWith(
+                      color: ChildColors.purpleMagic,
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                '$xp / $nextLevelXp XP',
+                style: ChildTextStyles.body.copyWith(
+                  color: Colors.grey,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 16,
+              backgroundColor: Colors.grey.shade200,
+              valueColor: AlwaysStoppedAnimation<Color>(ChildColors.yellowSun),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '¡Sigue así para llegar al nivel ${level + 1}!',
+            style: TextStyle(
+              color: Colors.grey.shade600,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAchievementsSection(UserService userService) {
+    // Simulación de logros por ahora
+    final achievements = [
+      {'icon': Icons.emoji_events, 'color': Colors.amber, 'name': 'Primeros Pasos'},
+      {'icon': Icons.menu_book, 'color': Colors.blue, 'name': 'Lector'},
+      {'icon': Icons.calculate, 'color': Colors.green, 'name': 'Matemático'},
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Tus Logros',
+          style: ChildTextStyles.subtitle.copyWith(
+            color: ChildColors.purpleMagic,
+          ),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 100,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: achievements.length,
+            itemBuilder: (context, index) {
+              final achievement = achievements[index];
+              return Container(
+                width: 80,
+                margin: const EdgeInsets.only(right: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      achievement['icon'] as IconData,
+                      color: achievement['color'] as Color,
+                      size: 32,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      achievement['name'] as String,
+                      style: const TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
   }
 
   Drawer _buildDrawer(BuildContext context) {

@@ -3,13 +3,15 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:waytolearn/core/services/orientation_service.dart';
 import 'package:waytolearn/core/services/user_service.dart';
+import 'package:waytolearn/core/services/content_service.dart';
+import 'package:waytolearn/core/services/progress_service.dart';
+import 'package:waytolearn/core/models/interactive_story_model.dart';
 import 'package:waytolearn/presentation/screens/communication/comm_index_screen_sessions.dart';
-import 'package:waytolearn/presentation/screens/mathematics/story_play_screen.dart';
+import 'package:waytolearn/presentation/screens/communication/story_screen.dart';
 import 'package:waytolearn/presentation/widgets/mathematics/home_icon_button.dart';
 import 'package:waytolearn/presentation/widgets/mathematics/communication_switch_button.dart';
 import 'package:waytolearn/presentation/widgets/mathematics/mathematics_bottom_bot.dart';
 import 'package:waytolearn/presentation/widgets/mathematics/story_path_widget.dart';
-import 'package:waytolearn/presentation/screens/mathematics/math_index_screen_sessions.dart';
 import 'package:waytolearn/presentation/screens/main/dashboard_screen.dart';
 
 
@@ -25,6 +27,14 @@ class _BearProgressMapScreenState extends State<BearProgressMapScreen> {
   void initState() {
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
+    // Load progress
+    Future.microtask(() {
+      final userService = Provider.of<UserService>(context, listen: false);
+      final userId = userService.currentUser?.id;
+      if (userId != null) {
+        Provider.of<ProgressService>(context, listen: false).loadProgress(userId, 'math');
+      }
+    });
   }
 
   @override
@@ -39,80 +49,105 @@ class _BearProgressMapScreenState extends State<BearProgressMapScreen> {
     const designWidth = 912.0;
     final scale = mediaSize.width / designWidth;
     
-    final userService = Provider.of<UserService>(context);
-    final user = userService.currentUser;
-    
-    // Obtener progreso real de matemáticas
-    // Asumimos que los primeros 7 niveles corresponden a la sesión 1
-    // Si el unlocked index es mayor a 6, significa que completó la sesión 1
-    int completedStoryIndex = -1;
-    if (user != null) {
-      final unlocked = user.getHighestUnlockedIndex('mathematics');
-      // Ajustar lógica según cómo se manejen las sesiones. 
-      // Si este mapa es SOLO para la sesión 1 (niveles 0-6):
-      completedStoryIndex = unlocked - 1;
-      if (completedStoryIndex > 6) completedStoryIndex = 6;
-    }
+    final contentService = Provider.of<ContentService>(context);
+    final progressService = Provider.of<ProgressService>(context);
+
+    // Hardcoded for now, as per Communication screen
+    final subjectId = 'math';
+    final sessionId = 'math_s1';
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Stack(
-        fit: StackFit.expand,
-        clipBehavior: Clip.none,
-        children: [
-          // Camino de cuentos - contenido principal centrado
-          Positioned(
-              top: 10 * scale,
-              left: -20 * scale,
-              child: StoryPathWidget(
-                completedStoryIndex: completedStoryIndex,
-                scale: scale,
-                onStoryTap: (index) {
-                  debugPrint('Tapped story: ${index + 1}');
-                  _navigateToStory(index);
-                },
-              ),
-            ),
-          Positioned(
-              top: -32,
-              left: -17,
-              child: HomeIconButton(
-                onPressed: _goToDashboard,
-              ),
-            ),
-            Positioned(
-              top: 14 * scale,
-              left: 806 * scale,
-              child: CommunicationSwitchButton(
-                onTap: _openCommunication,
-                scale: scale,
-              ),
-            ),
+      body: StreamBuilder<List<StoryModel>>(
+        stream: contentService.getStories(subjectId, sessionId),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-            // Bot de comunicación
-            Positioned(
-              top: 345 * scale,
-              left: 830 * scale,
-              child: MathematicsBottomBot(
-                scale: scale,
-                onTap: _refreshScreen,
-              ),
-            ),
-          ],
-        ),
+          final stories = snapshot.data ?? [];
+          
+          // Calculate completed index based on ProgressService
+          int completedStoryIndex = -1;
+          for (int i = 0; i < stories.length; i++) {
+            if (progressService.isStoryCompleted(stories[i].id)) {
+              completedStoryIndex = i;
+            } else {
+              break; 
+            }
+          }
+
+          return Stack(
+            fit: StackFit.expand,
+            clipBehavior: Clip.none,
+            children: [
+              // Camino de cuentos - contenido principal centrado
+              Positioned(
+                  top: 10 * scale,
+                  left: -20 * scale,
+                  child: StoryPathWidget(
+                    completedStoryIndex: completedStoryIndex,
+                    scale: scale,
+                    onStoryTap: (index) {
+                      if (index < stories.length) {
+                         // Check if unlocked
+                         bool isUnlocked = index == 0 || progressService.isStoryCompleted(stories[index - 1].id);
+                         if (isUnlocked) {
+                           _navigateToStory(stories[index], subjectId, sessionId);
+                         } else {
+                           ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('¡Completa el nivel anterior!')),
+                           );
+                         }
+                      } else {
+                        debugPrint('Story index $index out of bounds');
+                      }
+                    },
+                  ),
+                ),
+              Positioned(
+                  top: -32,
+                  left: -17,
+                  child: HomeIconButton(
+                    onPressed: _goToDashboard,
+                  ),
+                ),
+                Positioned(
+                  top: 14 * scale,
+                  left: 806 * scale,
+                  child: CommunicationSwitchButton(
+                    onTap: _openCommunication,
+                    scale: scale,
+                  ),
+                ),
+
+                // Bot de comunicación
+                Positioned(
+                  top: 345 * scale,
+                  left: 830 * scale,
+                  child: MathematicsBottomBot(
+                    scale: scale,
+                    onTap: _refreshScreen,
+                  ),
+                ),
+              ],
+            );
+        }
+      ),
     );
   }
 
-  Future<void> _navigateToStory(int index) async {
-    // Navegar a la pantalla de juego/cuento
+  Future<void> _navigateToStory(StoryModel story, String subjectId, String sessionId) async {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => StoryPlayScreen(storyIndex: index),
+        builder: (_) => StoryScreen(
+          story: story,
+          subjectId: subjectId,
+          sessionId: sessionId,
+        ),
       ),
     );
-    
-    debugPrint('Navegando al cuento $index');
   }
 
   Future<void> _openCommunication() async {
@@ -127,7 +162,6 @@ class _BearProgressMapScreenState extends State<BearProgressMapScreen> {
   }
 
   void _refreshScreen() {
-    // Recargar la pantalla completamente reemplazándola con una nueva instancia
     Navigator.pushReplacement(
       context,
       PageRouteBuilder(

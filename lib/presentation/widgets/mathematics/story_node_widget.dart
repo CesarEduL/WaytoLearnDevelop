@@ -7,6 +7,7 @@ class StoryNodeWidget extends StatefulWidget {
   final bool isLocked; // Nuevo parámetro
   final bool isHovered;
   final VoidCallback? onTap;
+  final Widget? customIcon;
   final double scale;
 
   const StoryNodeWidget({
@@ -17,6 +18,7 @@ class StoryNodeWidget extends StatefulWidget {
     this.isHovered = false,
     this.onTap,
     this.scale = 1.0,
+    this.customIcon,
   });
 
   @override
@@ -57,7 +59,7 @@ class _StoryNodeWidgetState extends State<StoryNodeWidget> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8 * widget.scale),
                 ),
-                child: SvgPicture.network(
+                child: widget.customIcon ?? SvgPicture.network(
                   widget.isCompleted ? completeIconUrl : pendingIconUrl,
                   fit: BoxFit.contain,
                   placeholderBuilder: (context) => const SizedBox.shrink(),

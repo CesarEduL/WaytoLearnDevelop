@@ -1,5 +1,13 @@
 import 'package:flutter/material.dart';
-import 'story_detail_screen.dart';
+import 'package:provider/provider.dart';
+import '../../../../core/services/content_service.dart';
+import '../../../../core/services/progress_service.dart';
+import '../../../../core/services/user_service.dart';
+import '../../../../core/models/interactive_story_model.dart';
+import 'story_screen.dart';
+import '../../widgets/mathematics/story_path_widget.dart'; // Importar widget compartido
+import '../../widgets/mathematics/home_icon_button.dart';
+import '../../widgets/communication/communication_bottom_bot.dart'; // Usar bot de comunicación
 
 class ProgressMapScreen extends StatefulWidget {
   final int sessionNumber;
@@ -28,90 +36,162 @@ class _ProgressMapScreenState extends State<ProgressMapScreen> {
   };
 
   @override
+  void initState() {
+    super.initState();
+    // Load progress for the current user
+    Future.microtask(() {
+      final userService = Provider.of<UserService>(context, listen: false);
+      final userId = userService.currentUser?.id;
+      if (userId != null) {
+        Provider.of<ProgressService>(context, listen: false).loadProgress(userId, 'communication');
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final progressService = Provider.of<ProgressService>(context);
+    final contentService = Provider.of<ContentService>(context);
+    
+    final subjectId = 'communication';
+    final sessionId = 'com_s${widget.sessionNumber}';
+
+    final mediaSize = MediaQuery.of(context).size;
+    const designWidth = 912.0;
+    final scale = mediaSize.width / designWidth;
+
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          Positioned.fill(child: CustomPaint(painter: _DottedPathPainter())),
-          ..._buildBookIcons(),
-          _buildBearReading(),
-          _buildHomeButton(),
-          _buildSettingsButton(),
-          _buildBookButton(),
-        ],
+      body: StreamBuilder<List<StoryModel>>(
+        stream: contentService.getStories(subjectId, sessionId),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          
+          if (snapshot.hasError) {
+             return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          final stories = snapshot.data ?? [];
+
+          // Calculate completed index
+          int completedStoryIndex = -1;
+          for (int i = 0; i < stories.length; i++) {
+            if (progressService.isStoryCompleted(stories[i].id)) {
+              completedStoryIndex = i;
+            } else {
+              break; 
+            }
+          }
+
+          return Stack(
+            fit: StackFit.expand,
+            clipBehavior: Clip.none,
+            children: [
+              // Camino de cuentos usando StoryPathWidget
+              Positioned(
+                top: 10 * scale,
+                left: -20 * scale,
+                child: StoryPathWidget(
+                  completedStoryIndex: completedStoryIndex,
+                  scale: scale,
+                  storyIconBuilder: (index, isCompleted, isLocked) {
+                    return Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Image.network(
+                          _urls['bookDefault']!,
+                          fit: BoxFit.contain,
+                        ),
+                        if (isCompleted)
+                          const Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: Icon(Icons.check_circle, color: Colors.green, size: 20),
+                          ),
+                      ],
+                    );
+                  },
+                  onStoryTap: (index) {
+                    if (index < stories.length) {
+                       bool isUnlocked = index == 0 || progressService.isStoryCompleted(stories[index - 1].id);
+                       if (isUnlocked) {
+                         _navigateToStory(stories[index], subjectId, sessionId);
+                       } else {
+                         ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('¡Completa el cuento anterior para desbloquear este!')),
+                         );
+                       }
+                    }
+                  },
+                ),
+              ),
+
+              // Botón Home
+              Positioned(
+                top: -32,
+                left: -17,
+                child: HomeIconButton(
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
+
+              // Botón Configuración (reemplazando switch button de math)
+              Positioned(
+                top: 14 * scale,
+                left: 806 * scale,
+                child: GestureDetector(
+                  onTap: _onSettingsTap,
+                  child: Image.network(_urls['settings']!, width: 90 * scale),
+                ),
+              ),
+
+              // Botón Libro (extra que tenía communication)
+              Positioned(
+                bottom: 5 * scale,
+                right: 10 * scale,
+                child: GestureDetector(
+                  onTap: _onBookMenuTap,
+                  child: Image.network(_urls['bookButton']!, width: 90 * scale),
+                ),
+              ),
+
+              // Oso leyendo (Personaje central)
+              Positioned(
+                left: MediaQuery.of(context).size.width * 0.43,
+                top: MediaQuery.of(context).size.height * 0.20,
+                child: GestureDetector(
+                  onTap: _onBearTap,
+                  child: Image.network(_urls['bear']!, width: 120 * scale),
+                ),
+              ),
+
+              // Bot de comunicación
+              Positioned(
+                top: 345 * scale,
+                left: 830 * scale,
+                child: CommunicationBottomBot(scale: scale),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
-  // 🔹 Libros
-  List<Widget> _buildBookIcons() {
-    final bookUrl = _urls['bookDefault']!;
-    final size = MediaQuery.of(context).size;
-
-    return [
-      Positioned(left: size.width * 0.08, top: size.height * 0.58, child: BookIcon(url: bookUrl, onTap: () => _onBookTap(1))),
-      Positioned(left: size.width * 0.18, top: size.height * 0.38, child: BookIcon(url: bookUrl, onTap: () => _onBookTap(2))),
-      Positioned(left: size.width * 0.30, top: size.height * 0.55, child: BookIcon(url: bookUrl, onTap: () => _onBookTap(3))),
-      Positioned(left: size.width * 0.48, top: size.height * 0.75, child: BookIcon(url: bookUrl, onTap: () => _onBookTap(4))),
-      Positioned(left: size.width * 0.62, top: size.height * 0.55, child: BookIcon(url: bookUrl, onTap: () => _onBookTap(5))),
-      Positioned(left: size.width * 0.75, top: size.height * 0.38, child: BookIcon(url: bookUrl, onTap: () => _onBookTap(6))),
-      Positioned(left: size.width * 0.88, top: size.height * 0.58, child: BookIcon(url: bookUrl, onTap: () => _onBookTap(7))),
-    ];
-  }
-
-  // 🔹 Oso
-  Widget _buildBearReading() {
-    final url = _urls['bear']!;
-    return Positioned(
-      left: MediaQuery.of(context).size.width * 0.43,
-      top: MediaQuery.of(context).size.height * 0.20,
-      child: BearIcon(url: url, onTap: _onBearTap),
+  void _navigateToStory(StoryModel story, String subjectId, String sessionId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => StoryScreen(
+          story: story, 
+          subjectId: subjectId, 
+          sessionId: sessionId
+        ),
+      ),
     );
   }
-
-  // 🔹 Botón Home
-  Widget _buildHomeButton() {
-    final url = _urls['home']!;
-    return Positioned(
-      top: 20,
-      left: 20,
-      child: MenuIcon(url: url, size: 60, onTap: () => Navigator.pop(context)),
-    );
-  }
-
-  // 🔹 Botón Configuración
-  Widget _buildSettingsButton() {
-    final url = _urls['settings']!;
-    return Positioned(
-      top: 20,
-      right: 20,
-      child: MenuIcon(url: url, size: 90, onTap: _onSettingsTap),
-    );
-  }
-
-  // 🔹 Botón Libro
-  Widget _buildBookButton() {
-    final url = _urls['bookButton']!;
-    return Positioned(
-      bottom: 5,
-      right: 10,
-      child: MenuIcon(url: url, size: 90, onTap: _onBookMenuTap),
-    );
-  }
-
-  // 🔹 Acciones
-  void _onBookTap(int bookNumber) {
-  final storyId = "C0$bookNumber"; // 1 → C01, 2 → C02, etc.
-
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => StoryDetailScreen(storyId: storyId),
-    ),
-  );
-}
-
 
   void _onBearTap() {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -142,104 +222,4 @@ class _ProgressMapScreenState extends State<ProgressMapScreen> {
       ),
     );
   }
-}
-
-//
-// 🔸 Widgets personalizados sin colores ni bordes
-//
-
-class BookIcon extends StatelessWidget {
-  final String url;
-  final VoidCallback onTap;
-
-  const BookIcon({super.key, required this.url, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: ClipOval(
-        child: Image.network(url, width: 55, height: 55, fit: BoxFit.cover),
-      ),
-    );
-  }
-}
-
-class BearIcon extends StatelessWidget {
-  final String url;
-  final VoidCallback onTap;
-
-  const BearIcon({super.key, required this.url, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(70),
-        child: Image.network(url, width: 120, height: 120, fit: BoxFit.cover),
-      ),
-    );
-  }
-}
-
-class MenuIcon extends StatelessWidget {
-  final String url;
-  final double size;
-  final VoidCallback onTap;
-
-  const MenuIcon({
-    super.key,
-    required this.url,
-    required this.onTap,
-    this.size = 70,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: ClipOval(
-        child: Image.network(url, width: size, height: size, fit: BoxFit.cover),
-      ),
-    );
-  }
-}
-
-//
-// 🔸 Dotted path
-//
-class _DottedPathPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.purple.shade300
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 10
-      ..strokeCap = StrokeCap.round;
-
-    final path = Path();
-    path.moveTo(size.width * 0.08, size.height * 0.60);
-    path.quadraticBezierTo(size.width * 0.18, size.height * 0.30, size.width * 0.30, size.height * 0.55);
-    path.quadraticBezierTo(size.width * 0.45, size.height * 0.70, size.width * 0.48, size.height * 0.75);
-    path.quadraticBezierTo(size.width * 0.60, size.height * 0.55, size.width * 0.75, size.height * 0.38);
-    path.quadraticBezierTo(size.width * 0.85, size.height * 0.55, size.width * 0.95, size.height * 0.58);
-
-    const dashWidth = 22.0;
-    const dashSpace = 12.0;
-    double distance = 0.0;
-
-    for (final metric in path.computeMetrics()) {
-      while (distance < metric.length) {
-        final next = distance + dashWidth;
-        final segment = metric.extractPath(distance, next);
-        canvas.drawPath(segment, paint);
-        distance += dashWidth + dashSpace;
-      }
-      distance = 0.0;
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

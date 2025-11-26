@@ -1,51 +1,164 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../core/services/story_service.dart';
-import '../../../core/models/story_node.dart';
+import '../../../core/models/interactive_story_model.dart';
+import '../../../core/services/content_service.dart';
+import '../../../core/services/progress_service.dart';
+import '../../../core/services/user_service.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/responsive_layout.dart';
+import '../../../core/widgets/loading_widget.dart';
+import '../../widgets/common/story_completion_dialog.dart';
 
 class StoryScreen extends StatefulWidget {
-  final String startNodeId;
-  const StoryScreen({super.key, required this.startNodeId});
+  final StoryModel story;
+  final String subjectId;
+  final String sessionId;
+
+  const StoryScreen({
+    super.key, 
+    required this.story,
+    required this.subjectId,
+    required this.sessionId,
+  });
 
   @override
   State<StoryScreen> createState() => _StoryScreenState();
 }
 
 class _StoryScreenState extends State<StoryScreen> {
-  StoryNode? _current;
+  StoryNode? _currentNode;
   bool _loading = true;
-  int _accumulatedScore = 0;
-
+  
   @override
   void initState() {
     super.initState();
-    _loadNode(widget.startNodeId);
+    _loadStartNode();
+  }
+
+  Future<void> _loadStartNode() async {
+    setState(() => _loading = true);
+    await _loadNode('start');
   }
 
   Future<void> _loadNode(String nodeId) async {
     setState(() => _loading = true);
-    final service = Provider.of<StoryService>(context, listen: false);
-    final node = await service.fetchStoryNode(nodeId);
-    setState(() {
-      _current = node;
-      _loading = false;
-    });
+    final contentService = Provider.of<ContentService>(context, listen: false);
+    
+    try {
+      final node = await contentService.getStoryNode(
+        widget.subjectId, 
+        widget.sessionId, 
+        widget.story.id, 
+        nodeId
+      );
+
+      if (node != null) {
+        setState(() {
+          _currentNode = node;
+          _loading = false;
+        });
+      } else {
+        debugPrint('Node $nodeId not found');
+        setState(() => _loading = false);
+      }
+    } catch (e) {
+      debugPrint('Error loading node: $e');
+      setState(() => _loading = false);
+    }
+  }
+
+  void _navigateToNode(String nodeId) {
+    if (nodeId == 'end' || nodeId.isEmpty) {
+      _finishStory();
+      return;
+    }
+    _loadNode(nodeId);
+  }
+
+  Future<void> _finishStory() async {
+    final userService = Provider.of<UserService>(context, listen: false);
+    final userId = userService.currentUser?.id;
+
+    if (userId != null) {
+      final progressService = Provider.of<ProgressService>(context, listen: false);
+      await progressService.markStoryCompleted(
+        userId, 
+        widget.subjectId, 
+        widget.story.id
+      );
+    }
+
+    if (!mounted) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => StoryCompletionDialog(
+        onContinue: () {
+          Navigator.pop(context); // Close dialog
+          Navigator.pop(context, true); // Go back to map and signal refresh
+        },
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_current?.storyTitle ?? 'Cuento'),
-        backgroundColor: AppTheme.secondaryColor,
-        foregroundColor: Colors.white,
+      // Fondo con gradiente suave para niños
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFFE0F7FA), // Cyan muy suave
+              Colors.white,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Custom AppBar
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  children: [
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.arrow_back_ios_rounded, color: AppTheme.primaryColor),
+                    ),
+                    Expanded(
+                      child: Text(
+                        widget.story.title,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.primaryColor,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    const SizedBox(width: 48), // Balancear el icono de back
+                  ],
+                ),
+              ),
+              
+              Expanded(
+                child: _loading
+                    ? const LoadingWidget(size: 80, color: AppTheme.secondaryColor)
+                    : _currentNode == null
+                        ? _buildError()
+                        : ResponsiveLayout(
+                            mobileBody: _buildVerticalLayout(_currentNode!),
+                            desktopBody: _buildHorizontalLayout(_currentNode!),
+                          ),
+              ),
+            ],
+          ),
+        ),
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _current == null
-              ? _buildError()
-              : _buildContent(),
     );
   }
 
@@ -54,53 +167,142 @@ class _StoryScreenState extends State<StoryScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.error, color: Colors.redAccent, size: 40),
-          const SizedBox(height: 8),
-          const Text('No se pudo cargar el cuento'),
-          const SizedBox(height: 12),
+          const Icon(Icons.error_outline_rounded, color: Colors.redAccent, size: 60),
+          const SizedBox(height: 16),
+          const Text(
+            '¡Ups! Algo salió mal.',
+            style: TextStyle(fontSize: 18, color: Colors.grey),
+          ),
+          const SizedBox(height: 24),
           ElevatedButton(
-            onPressed: () => _loadNode(widget.startNodeId),
-            child: const Text('Reintentar'),
+            onPressed: _loadStartNode,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryColor,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            ),
+            child: const Text('Intentar de nuevo'),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildContent() {
-    final node = _current!;
+  Widget _buildVerticalLayout(StoryNode node) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(24),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (node.imageUrl != null && node.imageUrl!.isNotEmpty)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Image.network(node.imageUrl!, fit: BoxFit.cover),
-            ),
-          const SizedBox(height: 16),
-          Text(
-            node.title,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
-                ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            node.content,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppTheme.textSecondary,
-                  height: 1.4,
-                ),
-          ),
-          const SizedBox(height: 20),
-          if (!node.isFinal)
-            ...node.options.map((opt) => _buildOptionButton(opt))
-          else
-            _buildFinalSection(node),
+          _buildImageCard(node.image),
+          const SizedBox(height: 24),
+          _buildStoryText(node.text),
+          const SizedBox(height: 32),
+          ...node.options.map((opt) => _buildOptionButton(opt)),
         ],
+      ),
+    );
+  }
+
+  Widget _buildHorizontalLayout(StoryNode node) {
+    return Padding(
+      padding: const EdgeInsets.all(32),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 5,
+            child: _buildImageCard(node.image),
+          ),
+          const SizedBox(width: 32),
+          Expanded(
+            flex: 5,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildStoryText(node.text),
+                  const SizedBox(height: 40),
+                  ...node.options.map((opt) => _buildOptionButton(opt)),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImageCard(String? imageUrl) {
+    if (imageUrl == null || imageUrl.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      height: 300, // Altura fija pero generosa
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Builder(
+          builder: (context) {
+            final url = imageUrl.trim();
+            return Image.network(
+              url,
+              fit: BoxFit.contain, // Mantiene la proporción completa
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return const LoadingWidget(size: 50, color: AppTheme.secondaryColor);
+              },
+              errorBuilder: (context, error, stackTrace) {
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.broken_image_rounded, size: 50, color: Colors.grey),
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'No se pudo cargar la imagen\n$error',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
+          }
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStoryText(String text) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppTheme.primaryColor.withOpacity(0.1), width: 2),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 22,
+          height: 1.5,
+          color: AppTheme.textSecondary,
+          fontWeight: FontWeight.w500,
+        ),
+        textAlign: TextAlign.center,
       ),
     );
   }
@@ -108,68 +310,24 @@ class _StoryScreenState extends State<StoryScreen> {
   Widget _buildOptionButton(StoryOption option) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 16),
       child: ElevatedButton(
-        onPressed: () => _onOptionSelected(option.subStoryId),
+        onPressed: () => _navigateToNode(option.nextNodeId),
         style: ElevatedButton.styleFrom(
           backgroundColor: AppTheme.secondaryColor,
           foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          elevation: 4,
+          shadowColor: AppTheme.secondaryColor.withOpacity(0.4),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text(option.text, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+        child: Text(
+          option.text, 
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          textAlign: TextAlign.center,
         ),
       ),
     );
   }
-
-  void _onOptionSelected(String nextId) async {
-    // Acumular puntaje si el nodo actual lo tiene
-    if (_current?.score != null) {
-      _accumulatedScore += _current!.score!;
-    }
-    await _loadNode(nextId);
-  }
-
-  Widget _buildFinalSection(StoryNode node) {
-    if (node.score != null) {
-      _accumulatedScore += node.score!;
-    }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.green.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.check_circle, color: Colors.green),
-              const SizedBox(width: 8),
-              const Text('¡Fin del cuento!'),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            const Icon(Icons.emoji_events, color: Colors.amber),
-            const SizedBox(width: 8),
-            Text('Puntaje obtenido: $_accumulatedScore'),
-          ],
-        ),
-        const SizedBox(height: 16),
-        ElevatedButton.icon(
-          onPressed: () => _loadNode(widget.startNodeId),
-          icon: const Icon(Icons.refresh),
-          label: const Text('Volver a empezar'),
-        ),
-      ],
-    );
-  }
 }
-
 

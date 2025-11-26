@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:waytolearn/core/services/orientation_service.dart';
-import 'package:waytolearn/presentation/screens/communication/bear_progress_map_screen.dart';
+import 'package:waytolearn/presentation/screens/communication/progress_map_screen.dart';
 import 'package:waytolearn/presentation/screens/mathematics/math_index_screen_sessions.dart';
 import 'package:waytolearn/presentation/screens/main/dashboard_screen.dart';
 import 'package:waytolearn/presentation/widgets/communication/home_icon_button.dart';
@@ -239,8 +239,8 @@ class _CommIndexScreenSessionsState extends State<CommIndexScreenSessions> {
             
             // Botón flotante inferior (CommunicationBottomBot)
             Positioned(
-              bottom: 20 * scale,
-              right: 20 * scale,
+              top: 345 * scale,
+              left: 830 * scale,
               child: CommunicationBottomBot(scale: scale),
             ),
               ],
@@ -325,7 +325,7 @@ class _CommIndexScreenSessionsState extends State<CommIndexScreenSessions> {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => const BearProgressMapScreen(),
+        builder: (_) => const ProgressMapScreen(sessionNumber: 1),
       ),
     );
   }
