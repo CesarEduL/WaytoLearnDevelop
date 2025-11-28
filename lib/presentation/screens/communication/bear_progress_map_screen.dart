@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:waytolearn/presentation/screens/communication/comm_index_screen_sessions.dart';
 import 'package:waytolearn/presentation/screens/main/dashboard_screen.dart';
 import 'package:waytolearn/presentation/widgets/communication/home_icon_button.dart';
 import 'package:waytolearn/presentation/widgets/communication/mathematics_switch_button.dart';
@@ -22,11 +23,6 @@ class _BearProgressMapScreenState extends State<BearProgressMapScreen> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
   }
 
-  @override
-  void dispose() {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +95,7 @@ class _BearProgressMapScreenState extends State<BearProgressMapScreen> {
     Navigator.pushReplacement(
       context,
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => const MathIndexScreenSessions(),
+        pageBuilder: (context, animation, secondaryAnimation) => const CommIndexScreenSessions(),
         transitionDuration: Duration.zero,
         reverseTransitionDuration: Duration.zero,
       ),

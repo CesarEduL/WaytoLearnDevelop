@@ -61,11 +61,6 @@ class _CommIndexScreenSessionsState extends State<CommIndexScreenSessions> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
   }
 
-  @override
-  void dispose() {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
@@ -14,6 +15,14 @@ import 'core/theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Configurar orientación horizontal y pantalla completa para toda la app
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]);
+  
+  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
   // Cargar variables de entorno
   await dotenv.load(fileName: ".env");

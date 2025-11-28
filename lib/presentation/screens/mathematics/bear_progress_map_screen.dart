@@ -26,12 +26,6 @@ class _BearProgressMapScreenState extends State<BearProgressMapScreen> {
   }
 
   @override
-  void dispose() {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final mediaSize = MediaQuery.of(context).size;
     const designWidth = 912.0;
