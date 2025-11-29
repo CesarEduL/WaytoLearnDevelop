@@ -6,6 +6,7 @@ import 'package:waytolearn/presentation/widgets/main/menu_icon_button.dart';
 import 'package:waytolearn/presentation/widgets/main/subject_comm_box_widget.dart';
 import 'package:waytolearn/presentation/widgets/main/subject_math_box_widget.dart';
 import 'package:waytolearn/presentation/widgets/main/achievements_box.dart';
+import 'package:waytolearn/presentation/widgets/main/user_info_box.dart';
 
 
 
@@ -48,6 +49,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: Stack(
           fit: StackFit.expand,
           children: [
+
             Positioned(
               top: -32,
               left: -18,
@@ -62,6 +64,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 },
               ),
             ),
+            
+            Positioned(
+              top: 15,
+              left: 550,
+              child: GestureDetector(
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Pantalla en desarrollo'),
+                      duration: Duration(seconds: 1),
+                    ),
+                  );
+                },
+              child: UserInfoBox(
+                childrenName: 'Invitado',
+                childrenIcon: null,
+              ),
+             ),
+            ),
+
             Positioned(
               top: 78,
               left: 28,
@@ -75,6 +97,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
             ),
+
             Positioned(
               top: 100,
               left: 28,
@@ -91,6 +114,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 },
               ),
             ),
+
             Positioned(
               top: 100,
               left: 425,
@@ -107,6 +131,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 },
               ),
             ),
+
             Positioned(
               top: 239,
               left: 28,
@@ -133,6 +158,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 isHovered: _achievementsBox1Hovered,
               ),  
             ),
+
             Positioned(
               top: 260,
               left: 300,
@@ -145,6 +171,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 isHovered: _achievementsBox2Hovered,
               ),
             ),
+
             Positioned(
               top: 260,
               left: 570,
@@ -181,6 +208,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
             ),
+
           ],
         ),
       ),
