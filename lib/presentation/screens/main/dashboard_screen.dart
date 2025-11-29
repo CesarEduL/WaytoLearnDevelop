@@ -51,21 +51,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
 
             Positioned(
-              top: -32,
-              left: -18,
-              child: MenuIconButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Pantalla en desarrollo'),
-                      duration: Duration(seconds: 1),
-                    ),
-                  );
-                },
-              ),
-            ),
-            
-            Positioned(
               top: 15,
               left: 550,
               child: GestureDetector(
@@ -208,7 +193,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
             ),
-
+            Positioned(
+              top: -32,
+              left: -18,
+              child: MenuIconDropdown(),
+            ),
           ],
         ),
       ),
