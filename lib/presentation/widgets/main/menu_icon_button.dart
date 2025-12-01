@@ -143,7 +143,7 @@ class _MenuIconDropdownState extends State<MenuIconDropdown> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => const MathIndexScreenSessions(),
+        builder: (_) => const ParentsIndexScreen(),
       ),
     );
   }
