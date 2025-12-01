@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:ui';
-
+import 'package:waytolearn/presentation/screens/parents/parents_index_screen.dart';
 // ============================================================================
 // MODELO DE DATOS - Opción del menú
 // ============================================================================
@@ -123,7 +123,7 @@ class _MenuIconDropdownState extends State<MenuIconDropdown> {
       title: 'Área de padres',
       icon: Icons.family_restroom_rounded,
       color: const Color(0xFFF68A5C),
-      onTap: () => _showDevelopmentMessage('Área de padres', const Color(0xFFF68A5C)),
+      onTap: _navigateToParentsIndex,
     ),
   ];
 
@@ -134,6 +134,16 @@ class _MenuIconDropdownState extends State<MenuIconDropdown> {
         backgroundColor: color,
         content: Text('Pantalla en desarrollo: $section'),
         duration: const Duration(milliseconds: 500),
+      ),
+    );
+  }
+
+  void _navigateToParentsIndex() {
+    if (!mounted) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const MathIndexScreenSessions(),
       ),
     );
   }
