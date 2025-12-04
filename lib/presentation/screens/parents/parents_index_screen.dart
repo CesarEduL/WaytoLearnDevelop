@@ -60,6 +60,7 @@ class _ParentsIndexScreenState extends State<ParentsIndexScreen> {
             top: 166,
             left: 27,
             child: OptionsParentsBox(
+              optionId: 1,
             ),
           ),
           //Progress boxes
@@ -67,6 +68,7 @@ class _ParentsIndexScreenState extends State<ParentsIndexScreen> {
             top: 166,
             left: 227,
             child: OptionsParentsBox(
+              optionId: 2,
             ),
           ),
           //Time use boxes
@@ -74,6 +76,8 @@ class _ParentsIndexScreenState extends State<ParentsIndexScreen> {
             top: 166,
             left: 427,
             child: OptionsParentsBox(
+              optionId: 3,
+              //onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => DashboardScreen())),
             ),
           ),
           //Settings boxes
@@ -81,6 +85,7 @@ class _ParentsIndexScreenState extends State<ParentsIndexScreen> {
             top: 166,
             left: 627,
             child: OptionsParentsBox(
+              optionId: 4,
             ),
           ),
           
