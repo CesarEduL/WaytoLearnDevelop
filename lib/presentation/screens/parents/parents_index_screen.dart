@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:waytolearn/presentation/screens/main/dashboard_screen.dart';
 import 'package:waytolearn/presentation/widgets/parents/home_icon_button.dart';
 import 'package:waytolearn/presentation/widgets/parents/children_list_box.dart';
+import 'package:waytolearn/presentation/widgets/parents/options_parents_box.dart';
 
 class  ParentsIndexScreen extends StatefulWidget {
   const ParentsIndexScreen({super.key});
@@ -53,7 +54,36 @@ class _ParentsIndexScreenState extends State<ParentsIndexScreen> {
             child: ChildrenListBox(
               children: testChildren,
             ),
+          ),          
+          //Perfil boxes
+          Positioned(
+            top: 166,
+            left: 27,
+            child: OptionsParentsBox(
+            ),
           ),
+          //Progress boxes
+          Positioned(
+            top: 166,
+            left: 227,
+            child: OptionsParentsBox(
+            ),
+          ),
+          //Time use boxes
+          Positioned(
+            top: 166,
+            left: 427,
+            child: OptionsParentsBox(
+            ),
+          ),
+          //Settings boxes
+          Positioned(
+            top: 166,
+            left: 627,
+            child: OptionsParentsBox(
+            ),
+          ),
+          
         ],
       ),
     );
