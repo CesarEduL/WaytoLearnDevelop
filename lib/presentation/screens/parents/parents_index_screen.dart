@@ -5,6 +5,7 @@ import 'package:waytolearn/presentation/widgets/parents/home_icon_button.dart';
 import 'package:waytolearn/presentation/widgets/parents/children_list_box.dart';
 import 'package:waytolearn/presentation/widgets/parents/options_parents_box.dart';
 
+
 class  ParentsIndexScreen extends StatefulWidget {
   const ParentsIndexScreen({super.key});
 
@@ -23,15 +24,17 @@ class _ParentsIndexScreenState extends State<ParentsIndexScreen> {
   Widget build(BuildContext context) {
     // Test data for children
     final testChildren = [
-      const Child(
+      Child(
         childrenId: 'c_001',
         childrenName: 'Joel El terrible',
         childrenIcon: 'https://media.licdn.com/dms/image/v2/D4E35AQGmQpgptGqReQ/profile-framedphoto-shrink_800_800/B4EZloGNF7IUAg-/0/1758388081267?e=1765180800&v=beta&t=BwRZqnZ332ZzHdnSueS3G5Fu5RKZ2t6TWDtvu7LeGdE',
+        birthDate: DateTime(2010, 5, 15),
       ),
-      const Child(
+      Child(
         childrenId: 'c_002',
         childrenName: 'Sofía Lima',
         childrenIcon: 'https://i.pravatar.cc/150?img=2',
+        birthDate: DateTime(2012, 8, 22),
       ),
     ];
 

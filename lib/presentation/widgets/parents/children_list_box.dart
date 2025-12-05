@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:waytolearn/presentation/screens/parents/area_son_edit.dart';
+import 'package:waytolearn/presentation/screens/parents/area_son_form.dart';
 
 /// Data model for a child
 class Child {
   final String childrenId;
   final String childrenName;
   final String? childrenIcon;
+  final DateTime? birthDate;
 
   const Child({
     required this.childrenId,
     required this.childrenName,
     this.childrenIcon,
+    this.birthDate,
   });
 }
 
@@ -162,10 +166,10 @@ class _ChildrenListBoxState extends State<ChildrenListBox> {
       if (widget.onEditChild != null) {
         widget.onEditChild!(child);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Función en desarrollo: editar niño (id: ${child.childrenId}).'),
-            duration: const Duration(seconds: 2),
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => AreaSonEdit(child: child),
           ),
         );
       }
@@ -173,11 +177,9 @@ class _ChildrenListBoxState extends State<ChildrenListBox> {
       if (widget.onAddChild != null) {
         widget.onAddChild!();
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Función en desarrollo: agregar niño.'),
-            duration: Duration(seconds: 2),
-          ),
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const AreaSonForm()),
         );
       }
     }
