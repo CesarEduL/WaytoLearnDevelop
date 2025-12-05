@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:waytolearn/presentation/screens/auth/auth_index.dart';
-import 'package:waytolearn/presentation/widgets/auth/login_form_box.dart';
 import 'package:waytolearn/presentation/widgets/parents/back_icon_button.dart';
+import 'package:waytolearn/presentation/widgets/auth/login_form_box.dart';
 
 
-class  LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class  RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
   @override
   void initState() {
     super.initState();
@@ -40,7 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
           Positioned(
-            top: 10,
+            top: 20,
             left: 150,
             right: 150,
             child: LoginFormBox(

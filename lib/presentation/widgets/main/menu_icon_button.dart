@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:waytolearn/presentation/screens/parents/parents_index_screen.dart';
 import 'package:waytolearn/presentation/widgets/parents/children_list_box.dart';
 import 'package:waytolearn/presentation/screens/parents/area_son_edit.dart';
+import 'package:waytolearn/presentation/screens/auth/auth_index.dart';
 // ============================================================================
 // MODELO DE DATOS - Opción del menú
 // ============================================================================
@@ -122,13 +123,13 @@ class _MenuIconDropdownState extends State<MenuIconDropdown> {
           title: 'Iniciar sesión',
           icon: Icons.login_rounded,
           color: const Color(0xFF2A1E96),
-          onTap: () => _showDevelopmentMessage('Iniciar sesión', const Color(0xFF2A1E96)),
+          onTap: _navigateToAuthIndex,
         ),
         MenuOption(
           title: 'Registrar cuenta',
           icon: Icons.app_registration_rounded,
           color: const Color(0xFF2A1E96),
-          onTap: () => _showDevelopmentMessage('Registrar cuenta', const Color(0xFF2A1E96)),
+          onTap: _navigateToAuthIndex
         ),
       ];
     }
@@ -171,6 +172,16 @@ class _MenuIconDropdownState extends State<MenuIconDropdown> {
         backgroundColor: color,
         content: Text('Pantalla en desarrollo: $section'),
         duration: const Duration(milliseconds: 500),
+      ),
+    );
+  }
+
+  void _navigateToAuthIndex() {
+    if (!mounted) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const AuthIndex(),
       ),
     );
   }
