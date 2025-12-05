@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:ui';
 import 'package:waytolearn/presentation/screens/parents/parents_index_screen.dart';
+import 'package:waytolearn/presentation/widgets/parents/children_list_box.dart';
+import 'package:waytolearn/presentation/screens/parents/area_son_edit.dart';
 // ============================================================================
 // MODELO DE DATOS - Opción del menú
 // ============================================================================
@@ -87,12 +89,16 @@ class MenuIconDropdown extends StatefulWidget {
   final String? iconUrl;
   final List<MenuOption>? options;
   final VoidCallback? onMenuClosed;
+  final Child? currentChild;
+  final bool isLoggedIn;
 
   const MenuIconDropdown({
     super.key,
     this.iconUrl = 'https://firebasestorage.googleapis.com/v0/b/waytolearn-3ebca.appspot.com/o/dashBoard_resources%2Fmenu-icon.svg?alt=media&token=15587218-982a-4272-a7b0-7e30f1df119d',
     this.options,
     this.onMenuClosed,
+    this.currentChild,
+    this.isLoggedIn = false,
   });
 
   @override
@@ -106,26 +112,57 @@ class _MenuIconDropdownState extends State<MenuIconDropdown> {
 
   // ====== Opciones por defecto ======
   
-  List<MenuOption> get _menuOptions => widget.options ?? [
-    MenuOption(
-      title: 'Tu hijo',
-      icon: Icons.child_care_rounded,
-      color: const Color(0xFF8A5CF6),
-      onTap: () => _showDevelopmentMessage('Tu hijo', const Color(0xFF8A5CF6)),
-    ),
-    MenuOption(
-      title: 'Informes de progreso',
-      icon: Icons.assessment_rounded,
-      color: const Color(0xFF5CF6D7),
-      onTap: () => _showDevelopmentMessage('Informes de progreso', const Color(0xFF5CF6D7)),
-    ),
-    MenuOption(
-      title: 'Área de padres',
-      icon: Icons.family_restroom_rounded,
-      color: const Color(0xFFF68A5C),
-      onTap: _navigateToParentsIndex,
-    ),
-  ];
+  List<MenuOption> get _menuOptions {
+    if (widget.options != null) return widget.options!;
+    
+    // Si NO está logueado, mostrar solo "Iniciar sesión"
+    if (!widget.isLoggedIn) {
+      return [
+        MenuOption(
+          title: 'Iniciar sesión',
+          icon: Icons.login_rounded,
+          color: const Color(0xFF2A1E96),
+          onTap: () => _showDevelopmentMessage('Iniciar sesión', const Color(0xFF2A1E96)),
+        ),
+        MenuOption(
+          title: 'Registrar cuenta',
+          icon: Icons.app_registration_rounded,
+          color: const Color(0xFF2A1E96),
+          onTap: () => _showDevelopmentMessage('Registrar cuenta', const Color(0xFF2A1E96)),
+        ),
+      ];
+    }
+    
+    // Si está logueado, mostrar todas las opciones
+    return [
+      MenuOption(
+        title: 'Tu hijo',
+        icon: Icons.child_care_rounded,
+        color: const Color(0xFF8A5CF6),
+        onTap: widget.currentChild != null 
+            ? () => _navigateToAreaSonEdit(widget.currentChild!)
+            : () => _showDevelopmentMessage('Tu hijo', const Color(0xFF8A5CF6)),
+      ),
+      MenuOption(
+        title: 'Informes de progreso',
+        icon: Icons.assessment_rounded,
+        color: const Color(0xFF5CF6D7),
+        onTap: () => _showDevelopmentMessage('Informes de progreso', const Color(0xFF5CF6D7)),
+      ),
+      MenuOption(
+        title: 'Área de padres',
+        icon: Icons.family_restroom_rounded,
+        color: const Color(0xFFF68A5C),
+        onTap: _navigateToParentsIndex,
+      ),    
+      MenuOption(
+        title: 'Cerrar sesión',
+        icon: Icons.logout_rounded,
+        color: const Color(0xFFFF5C5C),
+        onTap: () => _showDevelopmentMessage('Cerrar sesión', const Color(0xFFFF5C5C)),
+      ),
+    ];
+  }
 
   void _showDevelopmentMessage(String section, Color color) {
     if (!mounted) return;
@@ -144,6 +181,16 @@ class _MenuIconDropdownState extends State<MenuIconDropdown> {
       context,
       MaterialPageRoute(
         builder: (_) => const ParentsIndexScreen(),
+      ),
+    );
+  }
+
+  void _navigateToAreaSonEdit(Child child) {
+    if (!mounted) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AreaSonEdit(child: child),
       ),
     );
   }

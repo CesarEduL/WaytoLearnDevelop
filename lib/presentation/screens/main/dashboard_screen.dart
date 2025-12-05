@@ -7,6 +7,7 @@ import 'package:waytolearn/presentation/widgets/main/subject_comm_box_widget.dar
 import 'package:waytolearn/presentation/widgets/main/subject_math_box_widget.dart';
 import 'package:waytolearn/presentation/widgets/main/achievements_box.dart';
 import 'package:waytolearn/presentation/widgets/main/user_info_box.dart';
+import 'package:waytolearn/presentation/widgets/parents/children_list_box.dart';
 
 
 
@@ -31,6 +32,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool _achievementsBox1Hovered = false;
   bool _achievementsBox2Hovered = false;
   bool _achievementsBox3Hovered = false;
+
+  // Datos del niño actual (Mock data - reemplazar con datos reales más adelante)
+  final Child _currentChild = Child(
+    childrenId: 'c_001',
+    childrenName: 'Invitado',
+    childrenIcon: null,
+    birthDate: DateTime(2010, 5, 15),
+  );
+
+  // Estado de login (Mock - cambiar a false para simular usuario no logueado)
+  final bool _isLoggedIn = false; // Cambiar a false para probar sin login
+
   @override
   void initState() {
     super.initState();
@@ -63,8 +76,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   );
                 },
               child: UserInfoBox(
-                childrenName: 'Invitado',
-                childrenIcon: null,
+                childrenName: _currentChild.childrenName,
+                childrenIcon: _currentChild.childrenIcon,
               ),
              ),
             ),
@@ -196,7 +209,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Positioned(
               top: -32,
               left: -18,
-              child: MenuIconDropdown(),
+              child: MenuIconDropdown(
+                currentChild: _currentChild,
+                isLoggedIn: _isLoggedIn,
+              ),
             ),
           ],
         ),
