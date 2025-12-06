@@ -1,35 +1,41 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
-import 'package:waytolearn/presentation/screens/auth/register_screen.dart';
 
-class LoginFormBox extends StatefulWidget {
+class RegisterFormBox extends StatefulWidget {
   final Widget? child;
   final VoidCallback? onTap;
-  final Function(String email, String password)? onSubmit;
+  final Function(String username, String email, String password)? onSubmit;
 
-  const LoginFormBox({super.key, this.child, this.onTap, this.onSubmit});
+  const RegisterFormBox({super.key, this.child, this.onTap, this.onSubmit});
+  
   @override
-  State<LoginFormBox> createState() => _LoginFormBoxState();
+  State<RegisterFormBox> createState() => _RegisterFormBoxState();
 }
 
-class _LoginFormBoxState extends State<LoginFormBox> {
-  bool _showBubble = false;
+class _RegisterFormBoxState extends State<RegisterFormBox> {
   bool _isLoading = false;
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   @override
   void dispose() {
+    _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
+  String get username => _usernameController.text;
   String get email => _emailController.text;
   String get password => _passwordController.text;
 
   // Método para validar los datos del formulario
   bool _validateForm() {
+    if (_usernameController.text.trim().isEmpty) {
+      _showMessage('Por favor ingrese su nombre de usuario');
+      return false;
+    }
     if (_emailController.text.trim().isEmpty) {
       _showMessage('Por favor ingrese su correo');
       return false;
@@ -60,23 +66,12 @@ class _LoginFormBoxState extends State<LoginFormBox> {
     );
   }
 
-  // Método para navegar a RegisterScreen
-  Future<void> _goToRegister() async {
-    if (!mounted) return;
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const RegisterScreen(),
-      ),
-    );
-  }
-
-  // Método para iniciar sesión con Google
-  Future<void> _loginWithGoogle() async {
+  // Método para registrar con Google
+  Future<void> _registerWithGoogle() async {
     setState(() => _isLoading = true);
 
     try {
-      print('🔐 Iniciando sesión con Google...');
+      print('🔐 Registrando con Google...');
       
       // TODO: Implementar autenticación con Google
       // final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
@@ -90,9 +85,9 @@ class _LoginFormBoxState extends State<LoginFormBox> {
       // Simular delay de autenticación
       await Future.delayed(const Duration(seconds: 2));
 
-      _showMessage('Autenticación con Google en desarrollo');
+      _showMessage('Registro con Google en desarrollo');
     } catch (e) {
-      _showMessage('Error al iniciar sesión con Google: $e');
+      _showMessage('Error al registrar con Google: $e');
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -102,24 +97,21 @@ class _LoginFormBoxState extends State<LoginFormBox> {
 
   // Método para enviar los datos
   Future<void> _submitForm() async {
-    // Cerrar el teclado
     FocusScope.of(context).unfocus();
 
-    // Validar el formulario
     if (!_validateForm()) return;
 
     setState(() => _isLoading = true);
 
     try {
-      // Preparar los datos para enviar
       final formData = {
+        'username': _usernameController.text.trim(),
         'email': _emailController.text.trim(),
         'password': _passwordController.text,
         'timestamp': DateTime.now().toIso8601String(),
       };
 
-      // Imprimir en consola (para debugging)
-      print('📧 Datos del formulario a enviar:');
+      print('📧 Datos del registro a enviar:');
       formData.forEach((key, value) {
         if (key == 'password') {
           print('  $key: ********');
@@ -128,20 +120,20 @@ class _LoginFormBoxState extends State<LoginFormBox> {
         }
       });
 
-      // TODO: Aquí se enviará al backend cuando esté disponible
-      // final response = await apiService.login(formData);
-
-      // Simular delay de red
+      // TODO: Enviar al backend
       await Future.delayed(const Duration(seconds: 1));
 
-      // Llamar al callback onSubmit si existe
       if (widget.onSubmit != null) {
-        widget.onSubmit!(_emailController.text.trim(), _passwordController.text);
+        widget.onSubmit!(
+          _usernameController.text.trim(),
+          _emailController.text.trim(),
+          _passwordController.text,
+        );
       }
 
-      _showMessage('¡Datos enviados correctamente!');
+      _showMessage('¡Registro exitoso!');
     } catch (e) {
-      _showMessage('Error al enviar los datos: $e');
+      _showMessage('Error al registrar: $e');
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -180,24 +172,63 @@ class _LoginFormBoxState extends State<LoginFormBox> {
                 ),
               ),
             ),
-            // Contenido sin blur
+            // Username
             Positioned(
+              top: 50,
               left: 0,
-              top: 0,
               right: 0,
-              child: GestureDetector(
-                onTap: () => setState(() => _showBubble = !_showBubble),
-                child: Image.network(
-                  'https://firebasestorage.googleapis.com/v0/b/waytolearn-3ebca.appspot.com/o/auth_resources%2Foso-icon-3d-polygon.png?alt=media&token=04a27892-c1a3-49e1-893b-284aa48c9b17',
-                  width: 209,
-                  height: 141,
-                  fit: BoxFit.contain,
+              child: Center(
+                child: Container(
+                  width: 489,
+                  height: 60,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: const Color(0xFF5C7BF6),
+                      width: 2,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.person_outline,
+                        color: const Color(0xFF5C7BF6),
+                        size: 24,
+                      ),
+                      const SizedBox(width: 12),
+                      Container(
+                        width: 1,
+                        height: 30,
+                        color: const Color(0xFF5C7BF6),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: TextField(
+                          controller: _usernameController,
+                          decoration: InputDecoration(
+                            hintText: 'Nombre de usuario',
+                            hintStyle: TextStyle(
+                              color: const Color(0xFF5C7BF6).withOpacity(0.5),
+                              fontSize: 16,
+                            ),
+                            border: InputBorder.none,
+                          ),
+                          style: const TextStyle(
+                            color: Color(0xFF5C7BF6),
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-            //email
+            // Email
             Positioned(
-              top: 135,
+              top: 120,
               left: 0,
               right: 0,
               child: Center(
@@ -250,9 +281,9 @@ class _LoginFormBoxState extends State<LoginFormBox> {
                 ),
               ),
             ),
-            //password
+            // Password
             Positioned(
-              top: 205,
+              top: 190,
               left: 0,
               right: 0,
               child: Center(
@@ -305,32 +336,12 @@ class _LoginFormBoxState extends State<LoginFormBox> {
                 ),
               ),
             ),
+            // Botón de Google
             Positioned(
-              top: 265,
-              left: 20,
+              bottom: 65,
+              left: 0,
               child: GestureDetector(
-                onTap: _goToRegister,
-                child: Text(
-                  "Crear Cuenta",
-                  style: TextStyle(
-                    color: Color(0xFF5C7BF6),
-                    fontWeight: FontWeight.w600,
-                    decoration: TextDecoration.underline,
-                    decorationColor: Color(0xFF5C7BF6),
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              top: 265,
-              left: 350,
-              child: Text("Olvide mi contraseña"),
-            ),
-            Positioned(
-              top: 300,
-              left: 20,
-              child: GestureDetector(
-                onTap: _isLoading ? null : _loginWithGoogle,
+                onTap: _isLoading ? null : _registerWithGoogle,
                 child: Container(
                   width: 40,
                   height: 40,
@@ -358,10 +369,10 @@ class _LoginFormBoxState extends State<LoginFormBox> {
                 ),
               ),
             ),
-            // Botón Enviar
+            // Botón Registrar
             Positioned(
-              bottom: 40,
-              right: 10,
+              bottom: 60,
+              right: 0,
               child: ElevatedButton(
                 onPressed: _isLoading ? null : _submitForm,
                 style: ElevatedButton.styleFrom(
@@ -382,7 +393,7 @@ class _LoginFormBoxState extends State<LoginFormBox> {
                         ),
                       )
                     : const Text(
-                        'Iniciar Sesión',
+                        'Registrar',
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w600,
@@ -392,26 +403,6 @@ class _LoginFormBoxState extends State<LoginFormBox> {
                       ),
               ),
             ),
-
-            if (_showBubble)
-              Positioned(
-                left: -30,
-                top: 40,
-                child: Container(
-                  width: 250,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 8)],
-                  ),
-                  child: const Text(
-                    'Es hora de Iniciar Sesión y continuar aprendiendo!',
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF2A1E96)),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ),
             if (widget.child != null) widget.child!,
           ],
         ),

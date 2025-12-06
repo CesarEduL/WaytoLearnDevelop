@@ -42,7 +42,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   );
 
   // Estado de login (Mock - cambiar a false para simular usuario no logueado)
-  final bool _isLoggedIn = false; // Cambiar a false para probar sin login
+  final bool _isLoggedIn = true; // Cambiar a false para probar sin login
 
   @override
   void initState() {

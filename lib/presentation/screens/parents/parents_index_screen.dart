@@ -4,6 +4,7 @@ import 'package:waytolearn/presentation/screens/main/dashboard_screen.dart';
 import 'package:waytolearn/presentation/widgets/parents/home_icon_button.dart';
 import 'package:waytolearn/presentation/widgets/parents/children_list_box.dart';
 import 'package:waytolearn/presentation/widgets/parents/options_parents_box.dart';
+import 'package:waytolearn/presentation/screens/parents/parents_edit.dart';
 
 
 class  ParentsIndexScreen extends StatefulWidget {
@@ -64,6 +65,7 @@ class _ParentsIndexScreenState extends State<ParentsIndexScreen> {
             left: 27,
             child: OptionsParentsBox(
               optionId: 1,
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ParentsEdit())),
             ),
           ),
           //Progress boxes

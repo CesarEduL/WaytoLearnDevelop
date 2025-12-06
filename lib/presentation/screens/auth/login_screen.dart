@@ -26,28 +26,34 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFF8A5CF6),
-      body: Stack(
-        fit: StackFit.expand,
+      resizeToAvoidBottomInset: true,
+      body: SingleChildScrollView(
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height,
+          child: Stack(
+            fit: StackFit.expand,
 
-        children: [
+            children: [
 
-          Positioned(
-            top: -32,
-            left: -17,
-            child: BackIconButton(
-              backgroundColor: const Color(0xFF8A5CF6),
-              onPressed: _goToAuthIndex,
-            ),
+              Positioned(
+                top: -32,
+                left: -17,
+                child: BackIconButton(
+                  backgroundColor: const Color(0xFF8A5CF6),
+                  onPressed: _goToAuthIndex,
+                ),
+              ),
+              Positioned(
+                top: 10,
+                left: 150,
+                right: 150,
+                child: LoginFormBox(
+                  
+                ),
+              ),
+            ],
           ),
-          Positioned(
-            top: 10,
-            left: 150,
-            right: 150,
-            child: LoginFormBox(
-              
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

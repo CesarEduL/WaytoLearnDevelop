@@ -4,16 +4,19 @@ import 'package:waytolearn/presentation/screens/auth/auth_index.dart';
 import 'package:waytolearn/presentation/widgets/auth/bear_register_icon.dart';
 import 'package:waytolearn/presentation/widgets/auth/register_form_box.dart';
 import 'package:waytolearn/presentation/widgets/parents/back_icon_button.dart';
+import 'package:waytolearn/presentation/widgets/parents/parents_form_edit.dart';  
+import 'package:waytolearn/presentation/widgets/parents/Bear_parents_icon.dart';
 
 
-class  RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+
+class  ParentsEdit extends StatefulWidget {
+  const ParentsEdit({super.key});
 
   @override
-  State<RegisterScreen> createState() => _RegisterScreenState();
+  State<ParentsEdit> createState() => _ParentsEditState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
+class _ParentsEditState extends State<ParentsEdit> {
   @override
   void initState() {
     super.initState();
@@ -47,16 +50,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
             top: 20,
             left: 50,
             right: 350,
-            child: RegisterFormBox(
+            child: ParentsFormEdit(
               
             ),
           ),
           Positioned(
-            bottom: -35,
-            left: 520,
-            child: BearRegisterIcon(
-              
-            ),
+            bottom: -10,
+            left: 470,
+            child: BearParentsIcon(),
           ),
         ],
           ),
