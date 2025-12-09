@@ -5,7 +5,8 @@ import 'package:waytolearn/presentation/screens/parents/parents_index_screen.dar
 import 'package:waytolearn/presentation/widgets/parents/choose_image_box.dart';
 import 'package:waytolearn/presentation/widgets/parents/children_list_box.dart';
 import 'package:waytolearn/presentation/widgets/parents/info_children_box.dart';
-import 'package:waytolearn/presentation/widgets/parents/save_button.dart';
+import 'package:waytolearn/presentation/widgets/parents/childrens/save_button.dart';
+import 'package:waytolearn/presentation/widgets/parents/childrens/delete_button.dart';
 
   
 
@@ -66,9 +67,18 @@ class _AreaSonEditState extends State<AreaSonEdit> {
           ),
           Positioned(
             top: 315,
-            left: 350,
-            child: SaveButton(
-              onPressed: _saveChanges,
+            left: 280,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SaveButton(
+                  onPressed: _saveChanges,
+                ),
+                const SizedBox(width: 16),
+                DeleteButton(
+                  onPressed: _deleteChanges,
+                ),
+              ],
             ),
           ),
         ],
@@ -103,6 +113,33 @@ class _AreaSonEditState extends State<AreaSonEdit> {
     //   if (mounted) {
     //     ScaffoldMessenger.of(context).showSnackBar(
     //       SnackBar(content: Text('Error al guardar: $e')),
+    //     );
+    //   }
+    // }
+  }
+
+  Future<void> _deleteChanges() async {
+    // TODO: Implement Firebase delete functionality
+    // This will delete the child's data:
+    // - Remove child from Firebase
+    
+    // Example implementation:
+    // try {
+    //   await FirebaseFirestore.instance
+    //     .collection('children')
+    //     .doc(widget.child.childrenId)
+    //     .delete();
+    //   
+    //   if (mounted) {
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       const SnackBar(content: Text('Hijo eliminado exitosamente')),
+    //     );
+    //     _goToDashboard();
+    //   }
+    // } catch (e) {
+    //   if (mounted) {
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       SnackBar(content: Text('Error al eliminar: $e')),
     //     );
     //   }
     // }

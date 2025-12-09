@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:waytolearn/presentation/screens/auth/auth_index.dart';
+import 'package:waytolearn/presentation/screens/parents/parents_index_screen.dart';
 import 'package:waytolearn/presentation/widgets/auth/bear_register_icon.dart';
 import 'package:waytolearn/presentation/widgets/auth/register_form_box.dart';
 import 'package:waytolearn/presentation/widgets/parents/back_icon_button.dart';
@@ -43,7 +44,7 @@ class _ParentsEditState extends State<ParentsEdit> {
             left: -17,
             child: BackIconButton(
               backgroundColor: const Color(0xFF8A5CF6),
-              onPressed: _goToAuthIndex,
+              onPressed: _goToParentsIndex,
             ),
           ),
           Positioned(
@@ -66,12 +67,12 @@ class _ParentsEditState extends State<ParentsEdit> {
     );
   }
 
-  Future<void> _goToAuthIndex() async {
+  Future<void> _goToParentsIndex() async {
     if (!mounted) return;
     await Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (_) => const AuthIndex(),
+        builder: (_) => const ParentsIndexScreen(),
       ),
     );
   }
